@@ -1,0 +1,8 @@
+{
+  "name": "CHARS - Child Harassment & Abuse Reporting System",
+  "description": "A secure, anonymous reporting platform for child safety, featuring a Gemini-powered voice assistant to guide reporters and an admin dashboard for law enforcement.",
+  "requestFramePermissions": [
+    "microphone",
+    "geolocation"
+  ]
+}
