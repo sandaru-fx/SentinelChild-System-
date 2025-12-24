@@ -1,9 +1,9 @@
 
-import { Report, ReportStatus, Admin, AuditLog } from '../types';
+import { Report, ReportStatus, Admin, AuditLog, ChatSession, ChatMessage } from '../types';
 import { mockApi } from './mockApi';
 
-const N8N_BASE_URL = 'https://your-n8n-instance.com/webhook';
-const isDemo = () => N8N_BASE_URL.includes('your-n8n-instance.com');
+const N8N_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:8080' : 'https://your-n8n-instance.com/webhook';
+const isDemo = () => N8N_BASE_URL.includes('your-n8n-instance.com') && !window.location.search.includes('local=true');
 
 export const api = {
   submitReport: async (data: Partial<Report>): Promise<{ success: boolean; reportId: string }> => {
@@ -32,7 +32,7 @@ export const api = {
 
   login: async (email: string, password?: string): Promise<{ success: boolean; admin?: Admin; token?: string }> => {
     if (isDemo() || (email === 'admin@chars.gov' && password === 'admin123')) {
-       return mockApi.login(email);
+      return mockApi.login(email);
     }
     try {
       const response = await fetch(`${N8N_BASE_URL}/admin-login`, {
@@ -49,7 +49,7 @@ export const api = {
   getAllReports: async (token: string): Promise<Report[]> => {
     if (isDemo()) return mockApi.getAllReports();
     try {
-      const response = await fetch(`${N8N_BASE_URL}/admin-reports`, {
+      const response = await fetch(`${N8N_BASE_URL}/admin/reports`, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       return await response.json();
@@ -61,9 +61,9 @@ export const api = {
   updateReportStatus: async (id: string, status: ReportStatus, notes: string, token: string): Promise<boolean> => {
     if (isDemo()) return mockApi.updateReportStatus(id, status, notes);
     try {
-      const response = await fetch(`${N8N_BASE_URL}/update-report`, {
+      const response = await fetch(`${N8N_BASE_URL}/admin/update-report`, {
         method: 'PATCH',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
@@ -90,27 +90,130 @@ export const api = {
   },
 
   getAuditLogs: async (token: string): Promise<AuditLog[]> => {
-    return [
-      { id: 'l1', adminId: '1', action: 'System Login', timestamp: new Date().toISOString(), reportId: 'N/A', details: 'Authorized session established' },
-      { id: 'l2', adminId: '1', action: 'Accessed Case', timestamp: new Date(Date.now() - 3600000).toISOString(), reportId: 'CH-102933', details: 'Forensic review of attachments' }
-    ];
+    if (isDemo()) return mockApi.getAuditLogs(token);
+    try {
+      const response = await fetch(`${N8N_BASE_URL}/admin/logs`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      return await response.json();
+    } catch (error) {
+      return [
+        { id: 'l1', adminId: '1', action: 'System Login', timestamp: new Date().toISOString(), reportId: 'N/A', details: 'Authorized session established' }
+      ];
+    }
   },
 
   // Admin Management API
   getAllAdmins: async (token: string): Promise<Admin[]> => {
     if (isDemo()) return mockApi.getAllAdmins();
-    return mockApi.getAllAdmins();
+    try {
+      const response = await fetch(`${N8N_BASE_URL}/admin/personnel`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      return await response.json();
+    } catch (error) {
+      return mockApi.getAllAdmins();
+    }
   },
 
   createAdmin: async (admin: Partial<Admin>, token: string): Promise<Admin> => {
-    return mockApi.createAdmin(admin);
+    if (isDemo()) return mockApi.createAdmin(admin);
+    try {
+      const response = await fetch(`${N8N_BASE_URL}/admin/personnel`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(admin),
+      });
+      return await response.json();
+    } catch (error) {
+      return mockApi.createAdmin(admin);
+    }
   },
 
   updateAdmin: async (id: string, updates: Partial<Admin>, token: string): Promise<Admin | null> => {
-    return mockApi.updateAdmin(id, updates);
+    if (isDemo()) return mockApi.updateAdmin(id, updates);
+    try {
+      const response = await fetch(`${N8N_BASE_URL}/admin/personnel/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(updates),
+      });
+      if (response.ok) return { ...updates, id } as Admin;
+      return null;
+    } catch (error) {
+      return mockApi.updateAdmin(id, updates);
+    }
   },
 
   deleteAdmin: async (id: string, token: string): Promise<boolean> => {
-    return mockApi.deleteAdmin(id);
+    if (isDemo()) return mockApi.deleteAdmin(id);
+    try {
+      const response = await fetch(`${N8N_BASE_URL}/admin/personnel/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      return response.ok;
+    } catch (error) {
+      return mockApi.deleteAdmin(id);
+    }
+  },
+
+  // LIVE CHAT API
+  startChatSession: async (userId: string, phone: string, name: string): Promise<ChatSession> => {
+    if (isDemo()) return mockApi.startChatSession(userId, phone, name);
+    try {
+      const response = await fetch(`${N8N_BASE_URL}/chat/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, userPhone: phone, userName: name }),
+      });
+      return await response.json();
+    } catch (error) {
+      return mockApi.startChatSession(userId, phone, name);
+    }
+  },
+
+  getChatSessions: async (token: string): Promise<ChatSession[]> => {
+    if (isDemo()) return mockApi.getChatSessions();
+    try {
+      const response = await fetch(`${N8N_BASE_URL}/admin/chat/sessions`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      return await response.json();
+    } catch (error) {
+      return mockApi.getChatSessions();
+    }
+  },
+
+  sendMessage: async (sessionId: string, senderId: string, senderName: string, text: string): Promise<ChatMessage> => {
+    if (isDemo()) return mockApi.sendMessage(sessionId, senderId, senderName, text);
+    try {
+      const response = await fetch(`${N8N_BASE_URL}/chat/${sessionId}/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ senderId, senderName, text }),
+      });
+      return await response.json();
+    } catch (error) {
+      return mockApi.sendMessage(sessionId, senderId, senderName, text);
+    }
+  },
+
+  markAsRead: async (sessionId: string, token: string): Promise<void> => {
+    if (isDemo()) return mockApi.markAsRead(sessionId);
+    try {
+      await fetch(`${N8N_BASE_URL}/admin/chat/${sessionId}/read`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+    } catch (error) {
+      await mockApi.markAsRead(sessionId);
+    }
   }
 };

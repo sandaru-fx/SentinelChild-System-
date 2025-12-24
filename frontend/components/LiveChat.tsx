@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { mockApi } from '../services/mockApi';
+import { api } from '../services/api';
 import { ChatSession, ChatMessage } from '../types';
 
 interface LiveChatProps {
@@ -28,7 +28,7 @@ export default function LiveChat({ externalOpen, setExternalOpen }: LiveChatProp
   const [loading, setLoading] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
-  
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -48,27 +48,31 @@ export default function LiveChat({ externalOpen, setExternalOpen }: LiveChatProp
     let interval: any;
     if (step === 'CHAT' && session) {
       interval = setInterval(async () => {
-        const chats = await mockApi.getChatSessions();
-        const current = chats.find(s => s.id === session.id);
+        // For public chat, we don't have a token, but startChatSession 
+        // returned the session. For this demo, we'll just re-fetch using a logic
+        // that matches our backend. But handleLogin/startNewChat already sets the session.
+        // In a real app, you'd poll a specific session endpoint.
+        // Let's use startChatSession to "get" the session by phone.
+        const current = await api.startChatSession(userId, phone, name);
         if (current) setSession(current);
-      }, 2000);
+      }, 3000);
     }
     return () => clearInterval(interval);
-  }, [step, session?.id]);
+  }, [step, session?.id, userId, phone, name]);
 
   const validateLogin = (): boolean => {
     const newErrors: ValidationErrors = {};
-    
+
     // Name validation
     if (!name.trim()) newErrors.name = "Name is required.";
-    
+
     // Sri Lankan NIC Validation
     // 9 digits + V/X OR 12 digits
     const nicRegex = /^([0-9]{9}[vVxX]|[0-9]{12})$/;
     if (!nicRegex.test(userId.trim())) {
       newErrors.userId = "Invalid NIC format (9 digits + V/X or 12 digits).";
     }
-    
+
     // Phone validation (Sri Lankan)
     const phoneRegex = /^(?:\+94|0)7[0-9]{8}$/;
     if (!phoneRegex.test(phone.replace(/\s/g, ''))) {
@@ -82,7 +86,7 @@ export default function LiveChat({ externalOpen, setExternalOpen }: LiveChatProp
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateLogin()) return;
-    
+
     setLoading(true);
     const blocked = await mockApi.checkBlockedStatus(userId, phone);
     if (blocked) {
@@ -99,22 +103,16 @@ export default function LiveChat({ externalOpen, setExternalOpen }: LiveChatProp
   const verifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (otp === correctOtp) {
-      const allSessions = await mockApi.getChatSessions();
-      const previous = allSessions.filter(s => (s.userId === userId || s.userPhone === phone) && s.status !== 'CLOSED');
-      
-      if (previous.length > 0) {
-        setExistingSessions(previous);
-        setStep('CHOICE');
-      } else {
-        startNewChat();
-      }
+      // In a real app, we'd check for existing sessions on the backend
+      // Our StartChatSession already handles returning existing active sessions.
+      startNewChat();
     } else {
       alert("Invalid Security Code.");
     }
   };
 
   const startNewChat = async () => {
-    const sess = await mockApi.startChatSession(userId, phone, name);
+    const sess = await api.startChatSession(userId, phone, name);
     setSession(sess);
     setStep('CHAT');
   };
@@ -128,7 +126,7 @@ export default function LiveChat({ externalOpen, setExternalOpen }: LiveChatProp
     if (e) e.preventDefault();
     const textToSend = customText || input;
     if (!textToSend.trim() || !session) return;
-    const msg = await mockApi.sendMessage(session.id, 'user', name, textToSend);
+    const msg = await api.sendMessage(session.sessionId, 'user', name, textToSend);
     if (!customText) setInput('');
     setSession(prev => prev ? { ...prev, messages: [...prev.messages, msg] } : null);
   };
@@ -146,7 +144,7 @@ export default function LiveChat({ externalOpen, setExternalOpen }: LiveChatProp
   };
 
   if (!isOpen) return (
-    <button 
+    <button
       onClick={() => setIsOpen(true)}
       className="fixed bottom-28 right-8 z-[120] w-16 h-16 bg-indigo-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all ring-4 ring-indigo-600/10 ring-offset-8"
     >
@@ -181,55 +179,55 @@ export default function LiveChat({ externalOpen, setExternalOpen }: LiveChatProp
       <div className="flex-grow p-6 overflow-y-auto bg-slate-50/50">
         {isBlocked ? (
           <div className="h-full flex flex-col items-center justify-center text-center space-y-4">
-             <i className="fas fa-user-slash text-red-500 text-4xl"></i>
-             <h4 className="text-lg font-black text-slate-900">Access Restricted</h4>
-             <p className="text-xs text-slate-500 font-medium px-6">Your identity has been flagged by system administrators.</p>
+            <i className="fas fa-user-slash text-red-500 text-4xl"></i>
+            <h4 className="text-lg font-black text-slate-900">Access Restricted</h4>
+            <p className="text-xs text-slate-500 font-medium px-6">Your identity has been flagged by system administrators.</p>
           </div>
         ) : step === 'LOGIN' ? (
           <form onSubmit={handleLogin} className="space-y-4">
             <p className="text-xs text-slate-500 font-bold mb-6">Verification required to connect with an officer.</p>
-            
+
             <div className="space-y-1">
               <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Full Name</label>
-              <input 
-                required 
-                value={name} 
+              <input
+                required
+                value={name}
                 onChange={e => {
                   setName(e.target.value);
-                  if (errors.name) setErrors({...errors, name: undefined});
-                }} 
-                className={`w-full px-4 py-3 bg-white border ${errors.name ? 'border-red-500 ring-2 ring-red-500/10' : 'border-slate-200'} rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-600 font-bold transition-all`} 
-                placeholder="e.g. John Doe" 
+                  if (errors.name) setErrors({ ...errors, name: undefined });
+                }}
+                className={`w-full px-4 py-3 bg-white border ${errors.name ? 'border-red-500 ring-2 ring-red-500/10' : 'border-slate-200'} rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-600 font-bold transition-all`}
+                placeholder="e.g. John Doe"
               />
               {errors.name && <p className="text-[9px] font-black text-red-500 uppercase ml-1 mt-1 tracking-widest">{errors.name}</p>}
             </div>
 
             <div className="space-y-1">
               <label className="text-[10px] font-black uppercase text-slate-400 ml-1">National ID Number (NIC)</label>
-              <input 
-                required 
-                value={userId} 
+              <input
+                required
+                value={userId}
                 onChange={e => {
                   setUserId(e.target.value);
-                  if (errors.userId) setErrors({...errors, userId: undefined});
-                }} 
-                className={`w-full px-4 py-3 bg-white border ${errors.userId ? 'border-red-500 ring-2 ring-red-500/10' : 'border-slate-200'} rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-600 font-mono transition-all uppercase`} 
-                placeholder="e.g. 199512345678" 
+                  if (errors.userId) setErrors({ ...errors, userId: undefined });
+                }}
+                className={`w-full px-4 py-3 bg-white border ${errors.userId ? 'border-red-500 ring-2 ring-red-500/10' : 'border-slate-200'} rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-600 font-mono transition-all uppercase`}
+                placeholder="e.g. 199512345678"
               />
               {errors.userId && <p className="text-[9px] font-black text-red-500 uppercase ml-1 mt-1 tracking-widest">{errors.userId}</p>}
             </div>
 
             <div className="space-y-1">
               <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Phone Number</label>
-              <input 
-                required 
-                value={phone} 
+              <input
+                required
+                value={phone}
                 onChange={e => {
                   setPhone(e.target.value);
-                  if (errors.phone) setErrors({...errors, phone: undefined});
-                }} 
-                className={`w-full px-4 py-3 bg-white border ${errors.phone ? 'border-red-500 ring-2 ring-red-500/10' : 'border-slate-200'} rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-600 font-bold transition-all`} 
-                placeholder="+94 XX XXX XXXX" 
+                  if (errors.phone) setErrors({ ...errors, phone: undefined });
+                }}
+                className={`w-full px-4 py-3 bg-white border ${errors.phone ? 'border-red-500 ring-2 ring-red-500/10' : 'border-slate-200'} rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-600 font-bold transition-all`}
+                placeholder="+94 XX XXX XXXX"
               />
               {errors.phone && <p className="text-[9px] font-black text-red-500 uppercase ml-1 mt-1 tracking-widest">{errors.phone}</p>}
             </div>
@@ -252,35 +250,35 @@ export default function LiveChat({ externalOpen, setExternalOpen }: LiveChatProp
           </form>
         ) : step === 'CHOICE' ? (
           <div className="space-y-6 py-4 animate-fade-in">
-             <div className="flex flex-col items-start gap-3">
-               <div className="max-w-[85%] px-4 py-3 bg-slate-200 text-slate-600 rounded-2xl rounded-tl-none text-xs font-medium shadow-sm border border-slate-300">
-                  Hello {name}, how can I help you? Don't be afraid, we protect your privacy.
-               </div>
-               <div className="max-w-[85%] px-4 py-3 bg-slate-200 text-slate-600 rounded-2xl rounded-tl-none text-xs font-medium shadow-sm border border-slate-300">
-                  I found your previous conversation. Shall I connect you with your previous details or start a new chat?
-               </div>
-             </div>
-             
-             <div className="grid grid-cols-1 gap-4 mt-8">
-               <button 
-                  onClick={() => resumeChat(existingSessions[0])}
-                  className="w-full p-5 bg-white border-2 border-indigo-600 rounded-2xl text-left hover:bg-indigo-50 transition-all shadow-lg group"
-               >
-                  <div className="flex justify-between items-center">
-                    <span className="font-black text-indigo-600 uppercase text-[10px] tracking-widest">Connect Previous</span>
-                    <i className="fas fa-chevron-right text-indigo-600 group-hover:translate-x-1 transition-transform"></i>
-                  </div>
-                  <p className="text-[9px] text-slate-400 mt-1 font-bold uppercase">Case ID: {existingSessions[0].id.split('-')[1]}</p>
-               </button>
-               
-               <button 
-                  onClick={startNewChat}
-                  className="w-full p-5 bg-slate-100 border-2 border-transparent rounded-2xl text-left hover:bg-slate-200 transition-all"
-               >
-                  <span className="font-black text-slate-900 uppercase text-[10px] tracking-widest">Start New Inquiry</span>
-                  <p className="text-[9px] text-slate-400 mt-1 font-bold uppercase tracking-widest">Create fresh session</p>
-               </button>
-             </div>
+            <div className="flex flex-col items-start gap-3">
+              <div className="max-w-[85%] px-4 py-3 bg-slate-200 text-slate-600 rounded-2xl rounded-tl-none text-xs font-medium shadow-sm border border-slate-300">
+                Hello {name}, how can I help you? Don't be afraid, we protect your privacy.
+              </div>
+              <div className="max-w-[85%] px-4 py-3 bg-slate-200 text-slate-600 rounded-2xl rounded-tl-none text-xs font-medium shadow-sm border border-slate-300">
+                I found your previous conversation. Shall I connect you with your previous details or start a new chat?
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 mt-8">
+              <button
+                onClick={() => resumeChat(existingSessions[0])}
+                className="w-full p-5 bg-white border-2 border-indigo-600 rounded-2xl text-left hover:bg-indigo-50 transition-all shadow-lg group"
+              >
+                <div className="flex justify-between items-center">
+                  <span className="font-black text-indigo-600 uppercase text-[10px] tracking-widest">Connect Previous</span>
+                  <i className="fas fa-chevron-right text-indigo-600 group-hover:translate-x-1 transition-transform"></i>
+                </div>
+                <p className="text-[9px] text-slate-400 mt-1 font-bold uppercase">Case ID: {existingSessions[0].id.split('-')[1]}</p>
+              </button>
+
+              <button
+                onClick={startNewChat}
+                className="w-full p-5 bg-slate-100 border-2 border-transparent rounded-2xl text-left hover:bg-slate-200 transition-all"
+              >
+                <span className="font-black text-slate-900 uppercase text-[10px] tracking-widest">Start New Inquiry</span>
+                <p className="text-[9px] text-slate-400 mt-1 font-bold uppercase tracking-widest">Create fresh session</p>
+              </button>
+            </div>
           </div>
         ) : (
           <div ref={scrollRef} className="h-[350px] space-y-4 overflow-y-auto pr-2 custom-scrollbar pb-8">
@@ -291,14 +289,14 @@ export default function LiveChat({ externalOpen, setExternalOpen }: LiveChatProp
                   {m.isEdited && <span className="block text-[8px] opacity-60 mt-1 italic text-right">(edited)</span>}
                 </div>
                 <span className="text-[8px] font-black text-slate-400 uppercase mt-1 px-1">
-                  {m.senderId === 'user' ? 'You' : m.senderId === 'bot' ? 'System Bot' : 'Officer'} • {new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                  {m.senderId === 'user' ? 'You' : m.senderId === 'bot' ? 'System Bot' : 'Officer'} • {new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
             ))}
-            
+
             {session?.messages.length === 3 && session.messages[2].text.includes("connect you with an authorized duty officer") && (
               <div className="flex flex-col gap-2 mt-4 animate-fade-in items-start">
-                <button 
+                <button
                   onClick={() => handleSend(undefined, "Yes, please connect me with the admin/officer.")}
                   className="bg-white border-2 border-indigo-600 text-indigo-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
                 >

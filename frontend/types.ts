@@ -66,7 +66,8 @@ export interface ChatMessage {
 }
 
 export interface ChatSession {
-  id: string;
+  id: string; // MongoDB _id
+  sessionId: string; // Business ID (e.g. SESSION-12345)
   userId: string;
   userPhone: string;
   userName: string;
