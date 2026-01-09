@@ -1,20 +1,44 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 🛡️ SentinelChild-System
+> **A Comprehensive Child Safety and Monitoring Solution**
 
-# Run and deploy your AI Studio app
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Java](https://img.shields.io/badge/Language-Java-orange.svg)](https://www.java.com/)
+[![Status](https://img.shields.io/badge/Status-In--Development-green.svg)]()
 
-This contains everything you need to run your app locally.
+SentinelChild-System is a robust security and monitoring platform designed to provide parents with real-time insights into their children's digital and physical safety. This project focuses on modern monitoring techniques, ensuring a secure environment for the younger generation.
 
-View your app in AI Studio: https://ai.studio/apps/drive/1Z1itn74lI2ftEs1a0M4dYlySNphrjd8v
+---
 
-## Run Locally
+## 🚀 Key Features
 
-**Prerequisites:**  Node.js
+- **📍 Real-time Tracking:** Monitor location data with high precision.
+- **📱 App Usage Analytics:** Keep track of which applications are being used and for how long.
+- **⚠️ Geo-Fencing:** Receive instant alerts when the child enters or leaves predefined safe zones.
+- **🛡️ Web Filtering:** Block inappropriate content and manage internet access.
+- **📊 Activity Reports:** Detailed daily and weekly summaries of activities.
 
+---
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## 🛠️ Tech Stack
+
+- **Language:** Java / Kotlin (Assuming based on Android/Desktop context)
+- **Database:** Firebase / MySQL
+- **Architecture:** MVVM / Clean Architecture
+- **Tools:** Android Studio, Git
+
+---
+
+## 📸 Screenshots
+
+| Dashboard | Real-time Tracking | App Analytics |
+| :---: | :---: | :---: |
+| <img src="https://via.placeholder.com/200" width="200"> | <img src="https://via.placeholder.com/200" width="200"> | <img src="https://via.placeholder.com/200" width="200"> |
+*(Note: Replace these placeholders with your actual app screenshots)*
+
+---
+
+## ⚙️ Installation & Setup
+
+1. **Clone the repo:**
+   ```bash
+   git clone [https://github.com/sandaru-fx/SentinelChild-System-.git](https://github.com/sandaru-fx/SentinelChild-System-.git)
