@@ -42,3 +42,33 @@ SentinelChild-System is a robust security and monitoring platform designed to pr
 1. **Clone the repo:**
    ```bash
    git clone [https://github.com/sandaru-fx/SentinelChild-System-.git](https://github.com/sandaru-fx/SentinelChild-System-.git)
+   ```
+
+
+2. Open in IDE: Open the project folder in Android Studio or IntelliJ IDEA.
+
+3. Configure API Keys: Add your Google Maps or Firebase configuration files to the app/ directory.
+
+4. Build & Run: Click the 'Run' button or use:
+
+```Bash
+
+./gradlew assembleDebug
+
+```
+
+
+📈 Future Enhancements
+[ ] AI-driven behavioral analysis for risk detection.
+
+[ ] Emergency SOS integration with local authorities.
+
+[ ] Cross-platform support (iOS & Web).
+
+
+👤 Author
+Sandaru Chamoda
+
+GitHub: @sandaru-fx
+
+LinkedIn: www.linkedin.com/in/sandaru-jayaweera-329110373
