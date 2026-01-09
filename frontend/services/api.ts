@@ -2,8 +2,8 @@
 import { Report, ReportStatus, Admin, AuditLog, ChatSession, ChatMessage } from '../types';
 import { mockApi } from './mockApi';
 
-const N8N_BASE_URL = window.location.hostname === 'localhost' ? 'http://localhost:8080' : 'https://your-n8n-instance.com/webhook';
-const isDemo = () => N8N_BASE_URL.includes('your-n8n-instance.com') && !window.location.search.includes('local=true');
+const N8N_BASE_URL = 'https://sentinelchild-system.onrender.com';
+const isDemo = () => false; // Disable demo mode since we are using the live backend
 
 export const api = {
   submitReport: async (data: Partial<Report>): Promise<{ success: boolean; reportId: string }> => {
