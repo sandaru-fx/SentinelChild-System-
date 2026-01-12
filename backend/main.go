@@ -34,6 +34,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed connect mongo: %v", err)
 	}
+	log.Println("✅ MongoDB connection established successfully")
 	defer db.Close(ctx, client)
 
 	r := mux.NewRouter()

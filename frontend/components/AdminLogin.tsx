@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
@@ -18,7 +17,7 @@ export default function AdminLogin({ onLogin }: { onLogin: (admin: Admin) => voi
 
     try {
       const result = await api.login(email, password);
-      
+
       if (result.success && result.admin) {
         onLogin({
           ...result.admin,
@@ -33,16 +32,17 @@ export default function AdminLogin({ onLogin }: { onLogin: (admin: Admin) => voi
             name: 'Duty Officer',
             email: 'admin@chars.gov',
             role: AdminRole.SUPER_ADMIN,
-            token: 'demo-jwt-token-' + Date.now()
+            token: 'demo-jwt-token-' + Date.now(),
+            avatar: ''
           };
           onLogin(demoAdmin);
           navigate('/admin/dashboard');
         } else {
-          setError('Invalid credentials. Please try again.');
+          setError('Access Denied. Invalid terminal credentials.');
         }
       }
     } catch (err) {
-      setError('Connection refused. Using mock authentication.');
+      setError('Connection timeout. Authentication server unreachable.');
     } finally {
       setLoading(false);
     }
@@ -51,77 +51,102 @@ export default function AdminLogin({ onLogin }: { onLogin: (admin: Admin) => voi
   const handleQuickLogin = () => {
     setEmail('admin@chars.gov');
     setPassword('admin123');
-    // We use setTimeout to ensure state updates before calling handleLogin
     setTimeout(() => handleLogin(), 100);
   };
 
   return (
-    <div className="max-w-md w-full mx-auto px-4">
-      <div className="bg-white p-10 rounded-[2.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
-        {/* Decorative Top Bar */}
-        <div className="absolute top-0 left-0 w-full h-1.5 bg-blue-600"></div>
+    <div className="max-w-xl w-full mx-auto px-6 py-20 animate-fade-in">
+      <div className="bg-white rounded-[3.5rem] shadow-[0_32px_128px_-16px_rgba(0,0,0,0.1)] border border-slate-100 relative overflow-hidden p-12 lg:p-16">
+        {/* Forensic Header Bar */}
+        <div className="absolute top-0 left-0 w-full h-1.5 bg-[var(--admin-accent)]"></div>
+        <div className="absolute top-0 left-0 w-full h-[300px] bg-gradient-to-b from-[var(--admin-accent)]/5 to-transparent -z-0"></div>
 
-        <div className="text-center mb-10">
-          <div className="w-16 h-16 bg-slate-50 border border-slate-100 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">
-            <i className="fas fa-user-shield"></i>
-          </div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">Admin Login</h1>
-          <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">Authorized Personnel Only</p>
-        </div>
-
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
-            <input 
-              type="email" 
-              required
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-blue-600 outline-none transition-all font-bold text-sm"
-              placeholder="admin@chars.gov"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Password</label>
-            <input 
-              type="password" 
-              required
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="w-full px-6 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-blue-600 outline-none transition-all font-bold text-sm"
-              placeholder="••••••••"
-            />
-          </div>
-
-          {error && (
-            <div className="text-red-600 text-[10px] font-black uppercase bg-red-50 p-4 rounded-xl border border-red-100 flex items-center gap-3">
-              <i className="fas fa-circle-exclamation"></i> {error}
+        <div className="relative z-10">
+          <div className="text-center mb-16">
+            <div className="w-24 h-24 bg-white shadow-2xl shadow-slate-200 border border-slate-50 text-[var(--admin-accent)] rounded-[2rem] flex items-center justify-center mx-auto mb-8 text-4xl transition-transform hover:scale-110 duration-500">
+              <i className="fas fa-shield-halved"></i>
             </div>
-          )}
+            <h1 className="text-4xl font-black text-slate-900 tracking-tighter italic">Command Authority</h1>
+            <div className="flex items-center justify-center gap-4 mt-3">
+              <div className="h-px w-8 bg-slate-200"></div>
+              <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.4em]">Authorized Access Only</p>
+              <div className="h-px w-8 bg-slate-200"></div>
+            </div>
+          </div>
 
-          <button 
-            type="submit"
-            disabled={loading}
-            className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-600 transition-all flex items-center justify-center gap-3 disabled:opacity-70 shadow-xl shadow-slate-100"
-          >
-            {loading ? <i className="fas fa-circle-notch fa-spin"></i> : "Sign In"}
-          </button>
-        </form>
+          <form onSubmit={handleLogin} className="space-y-10">
+            <div className="space-y-4">
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 flex items-center gap-2">
+                  <i className="fas fa-at text-[var(--admin-accent)]"></i> Terminal Identity
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  className="w-full px-8 py-5 bg-slate-50 border-2 border-transparent focus:border-[var(--admin-accent)]/20 focus:bg-white rounded-[1.5rem] outline-none transition-all font-bold text-sm shadow-inner placeholder:text-slate-300"
+                  placeholder="name@agency.gov"
+                />
+              </div>
 
-        {/* Developer Quick-Login Helper */}
-        <div className="mt-8 pt-8 border-t border-slate-50 text-center">
-          <button 
-            onClick={handleQuickLogin}
-            className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:text-blue-800 transition-colors flex items-center justify-center gap-2 mx-auto"
-          >
-            <i className="fas fa-bolt"></i>
-            Use Demo Credentials
-          </button>
-          <p className="mt-2 text-[8px] font-bold text-slate-300 uppercase tracking-widest">
-            (admin@chars.gov / admin123)
-          </p>
+              <div className="space-y-3">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2 flex items-center gap-2">
+                  <i className="fas fa-key text-[var(--admin-accent)]"></i> Secure Passcode
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="w-full px-8 py-5 bg-slate-50 border-2 border-transparent focus:border-[var(--admin-accent)]/20 focus:bg-white rounded-[1.5rem] outline-none transition-all font-bold text-sm shadow-inner placeholder:text-slate-300"
+                  placeholder="••••••••"
+                />
+              </div>
+            </div>
+
+            {error && (
+              <div className="text-red-600 text-[10px] font-black uppercase tracking-widest bg-red-50 p-6 rounded-2xl border border-red-100 flex items-center gap-4 animate-slide-up shadow-sm">
+                <div className="w-8 h-8 rounded-lg bg-red-100 flex items-center justify-center shrink-0">
+                  <i className="fas fa-exclamation-triangle"></i>
+                </div>
+                {error}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-slate-900 text-white py-6 rounded-[1.8rem] font-black text-[11px] uppercase tracking-[0.3em] hover:bg-[var(--admin-accent)] transition-all flex items-center justify-center gap-5 disabled:opacity-70 shadow-2xl shadow-slate-200 active:scale-95 group"
+            >
+              {loading ? <i className="fas fa-sync fa-spin"></i> : (
+                <>
+                  Establish Terminal Link
+                  <i className="fas fa-arrow-right-long group-hover:translate-x-2 transition-transform"></i>
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Quick-Link for Authorized Devs */}
+          <div className="mt-12 pt-10 border-t border-slate-50 text-center">
+            <button
+              onClick={handleQuickLogin}
+              className="text-[10px] font-black text-slate-400 hover:text-[var(--admin-accent)] uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-3 mx-auto px-6 py-3 rounded-xl hover:bg-slate-50"
+            >
+              <i className="fas fa-bolt-lightning"></i>
+              Bypass for Emergency Ops
+            </button>
+            <p className="mt-3 text-[10px] font-bold text-slate-200 uppercase tracking-widest">
+              Security Protocol: admin@chars.gov / admin123
+            </p>
+          </div>
         </div>
+      </div>
+
+      <div className="mt-12 text-center space-y-2 opacity-30">
+        <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-400">Government Property</p>
+        <p className="text-[10px] font-bold text-slate-400 max-w-sm mx-auto leading-relaxed">System usage is monitored and recorded. Unauthorized access is punishable under federal cyber-security regulations.</p>
       </div>
     </div>
   );

@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import AdminLayout from './layouts/AdminLayout';
 import { HashRouter, Routes, Route, Link } from 'react-router-dom';
 import { Admin } from './types';
 import LandingPage from './pages/LandingPage';
@@ -10,12 +11,20 @@ import ContactPage from './pages/ContactPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import AdminProfilePage from './pages/AdminProfilePage';
+import AdminCasesPage from './pages/AdminCasesPage';
+import AdminChatPage from './pages/AdminChatPage';
+import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
+import AdminTaskBoardPage from './pages/AdminTaskBoardPage'; // Import AdminTaskBoardPage
+import AdminUsersPage from './pages/AdminUsersPage'; // Import AdminUsersPage
 import { Navbar } from './components/Navbar';
+
 import VoiceAssistant from './components/VoiceAssistant';
 import LiveChat from './components/LiveChat';
 import OnboardingModal from './components/OnboardingModal';
-import SafetyCluster from './components/SafetyCluster'; // Updated name for SafetyCluster
+import SafetyCluster from './components/SafetyCluster';
+import Background3D from './components/Background3D';
 import { LanguageProvider } from './context/LanguageContext';
+import { ThemeProvider } from './context/ThemeContext';
 
 const Footer = () => (
   <footer className="bg-slate-950 text-slate-500 py-16 px-4 border-t border-slate-900">
@@ -73,30 +82,35 @@ export default function App() {
 
   return (
     <LanguageProvider>
-      <HashRouter>
-        <div className="min-h-screen flex flex-col font-sans bg-slate-50 selection:bg-blue-100 selection:text-blue-900">
-          <Navbar user={user} onLogout={handleLogout} />
-          
-          <main className="flex-grow">
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/report" element={<ReportPage />} />
-              <Route path="/status" element={<StatusPage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/admin-login" element={<AdminLoginPage onLogin={handleLogin} />} />
-              <Route path="/admin/dashboard" element={<AdminDashboardPage user={user} />} />
-              <Route path="/admin/profile" element={<AdminProfilePage user={user} />} />
-            </Routes>
-          </main>
+      <ThemeProvider>
+        <HashRouter>
+          <div className="min-h-screen flex flex-col font-sans selection:bg-blue-500 selection:text-white relative bg-[var(--color-bg)] transition-colors duration-200">
+            <Background3D />
 
-          <Footer />
-          <VoiceAssistant />
-          <LiveChat externalOpen={chatOpen} setExternalOpen={setChatOpen} />
-          <SafetyCluster onOpenHelp={() => setChatOpen(true)} />
-          <OnboardingModal />
-        </div>
-      </HashRouter>
+            <Routes>
+              {/* Public Routes with Standard Navbar/Footer */}
+              <Route path="/" element={<><Navbar user={user} onLogout={handleLogout} /><main className="flex-grow"><LandingPage /></main><Footer /><VoiceAssistant /><LiveChat externalOpen={chatOpen} setExternalOpen={setChatOpen} /><SafetyCluster onOpenHelp={() => setChatOpen(true)} /><OnboardingModal /></>} />
+              <Route path="/report" element={<><Navbar user={user} onLogout={handleLogout} /><main className="flex-grow"><ReportPage /></main><Footer /><VoiceAssistant /><LiveChat externalOpen={chatOpen} setExternalOpen={setChatOpen} /><SafetyCluster onOpenHelp={() => setChatOpen(true)} /><OnboardingModal /></>} />
+              <Route path="/status" element={<><Navbar user={user} onLogout={handleLogout} /><main className="flex-grow"><StatusPage /></main><Footer /><VoiceAssistant /><LiveChat externalOpen={chatOpen} setExternalOpen={setChatOpen} /><SafetyCluster onOpenHelp={() => setChatOpen(true)} /></>} />
+              <Route path="/about" element={<><Navbar user={user} onLogout={handleLogout} /><main className="flex-grow"><AboutPage /></main><Footer /><VoiceAssistant /><LiveChat externalOpen={chatOpen} setExternalOpen={setChatOpen} /><SafetyCluster onOpenHelp={() => setChatOpen(true)} /></>} />
+              <Route path="/contact" element={<><Navbar user={user} onLogout={handleLogout} /><main className="flex-grow"><ContactPage /></main><Footer /><VoiceAssistant /><LiveChat externalOpen={chatOpen} setExternalOpen={setChatOpen} /><SafetyCluster onOpenHelp={() => setChatOpen(true)} /></>} />
+              <Route path="/admin-login" element={<><Navbar user={user} onLogout={handleLogout} /><main className="flex-grow"><AdminLoginPage onLogin={handleLogin} /></main><Footer /></>} />
+
+              {/* Admin Routes with Sidebar Layout */}
+              <Route path="/admin" element={<AdminLayout user={user} onLogout={handleLogout} />}>
+                <Route path="dashboard" element={<AdminDashboardPage user={user} />} />
+                <Route path="cases" element={<AdminCasesPage user={user} />} />
+                <Route path="chat" element={<AdminChatPage user={user} />} />
+                <Route path="analytics" element={<AdminAnalyticsPage />} />
+                <Route path="tasks" element={<AdminTaskBoardPage user={user} />} />
+                <Route path="users" element={<AdminUsersPage user={user} />} />
+                <Route path="profile" element={<AdminProfilePage user={user} />} />
+              </Route>
+            </Routes>
+
+          </div>
+        </HashRouter>
+      </ThemeProvider>
     </LanguageProvider>
   );
 }

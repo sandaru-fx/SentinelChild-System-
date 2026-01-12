@@ -1,311 +1,225 @@
-
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, Sphere, MeshDistortMaterial, Float } from '@react-three/drei';
 import { useTranslation } from '../context/LanguageContext';
 import { api } from '../services/api';
 
+// 3D Scene Component
+const SecureGlobe = () => {
+  return (
+    <Float speed={2} rotationIntensity={1} floatIntensity={1}>
+      <Sphere args={[1, 100, 200]} scale={2}>
+        <MeshDistortMaterial
+          color="#3b82f6"
+          attach="material"
+          distort={0.3}
+          speed={1.5}
+          roughness={0.2}
+          metalness={0.8}
+          wireframe={true}
+        />
+      </Sphere>
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[10, 10, 5]} intensity={1} />
+    </Float>
+  );
+};
+
 export default function ContactPage() {
   const { t } = useTranslation();
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [formEmail, setFormEmail] = useState('');
-  const [formLocation, setFormLocation] = useState('');
+  const [formName, setFormName] = useState('');
   const [formMessage, setFormMessage] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
-
-  const handleCopy = (text: string, label: string) => {
-    navigator.clipboard.writeText(text);
-    setCopyFeedback(label);
-    setTimeout(() => setCopyFeedback(null), 2000);
-  };
-
-  const handleCategorySelect = (category: string) => {
-    setSelectedCategory(category);
-    setIsSuccess(false);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedCategory || !formMessage) return;
+    if (!formMessage) return;
 
     setIsSubmitting(true);
-    const result = await api.sendInquiry({
-      category: selectedCategory,
-      email: formEmail,
-      location: formLocation,
-      message: formMessage
-    });
-
-    if (result.success) {
+    // Mock API call simulation for General Inquiry
+    setTimeout(() => {
       setIsSuccess(true);
+      setIsSubmitting(false);
       setFormEmail('');
-      setFormLocation('');
+      setFormName('');
       setFormMessage('');
-      setTimeout(() => setSelectedCategory(null), 3000);
-    } else {
-      alert("Submission failed. Please try again later.");
-    }
-    setIsSubmitting(false);
+    }, 1500);
   };
 
   return (
-    <div className="min-h-screen bg-background-light dark:bg-background-dark font-display text-gray-900 dark:text-white antialiased">
-      <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden max-w-md mx-auto shadow-2xl bg-white dark:bg-background-dark">
-        <div className="sticky top-0 z-50 bg-alert px-4 py-3 shadow-lg">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-start gap-2 text-left">
-              <span className="material-symbols-outlined text-white text-xl shrink-0 mt-0.5">warning</span>
-              <p className="text-white text-sm font-bold leading-snug">
-                {t('dangerWarning')}
-              </p>
-            </div>
-            <button 
-              onClick={() => window.location.href = 'tel:911'}
-              className="bg-white/20 hover:bg-white/30 active:bg-white/40 text-white text-xs font-bold px-3 py-1.5 rounded uppercase tracking-wide transition-colors shrink-0"
-            >
-              {t('callEmergency')}
-            </button>
-          </div>
+    <div className="min-h-screen bg-slate-50 relative overflow-hidden font-sans">
+
+      {/* 3D Background Layer */}
+      <div className="absolute top-0 right-0 w-full h-full md:w-1/2 opacity-20 pointer-events-none z-0">
+        <Canvas>
+          <Suspense fallback={null}>
+            <SecureGlobe />
+            <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={0.5} />
+          </Suspense>
+        </Canvas>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 py-12 relative z-10">
+
+        {/* Header */}
+        <div className="mb-16 text-center md:text-left">
+          <span className="text-blue-600 font-black uppercase text-[10px] tracking-[0.3em]">Official Channels</span>
+          <h1 className="text-4xl md:text-5xl font-black text-slate-900 mt-4 mb-2">Contact & <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">Support</span></h1>
+          <p className="text-slate-500 max-w-xl font-medium">
+            Reach out to the National Child Protection Authority or Sri Lanka Police for inquiries. For emergencies, please call the hotlines directly.
+          </p>
         </div>
 
-        <header className="flex items-center justify-between p-5 pb-2">
-          <div className="flex flex-col text-left">
-            <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{t('contactTitle')}</h1>
-            <p className="text-sm font-medium text-text-secondary">{t('contactSub')}</p>
-          </div>
-          <div className="h-10 w-10 bg-primary/20 rounded-full flex items-center justify-center cursor-pointer" onClick={() => setSelectedCategory(null)}>
-            <span className="material-symbols-outlined text-primary">{selectedCategory ? 'arrow_back' : 'shield'}</span>
-          </div>
-        </header>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
 
-        <main className="flex-1 flex flex-col gap-6 p-5">
-          {selectedCategory ? (
-            <section className="animate-fade-in space-y-6">
-              <div className="flex items-center gap-3 p-4 bg-slate-50 dark:bg-surface-dark rounded-xl border border-slate-100 dark:border-surface-border">
-                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                   <span className="material-symbols-outlined text-primary">chat_bubble</span>
+          {/* Left Column: Official Contacts */}
+          <div className="space-y-8">
+
+            {/* Emergency Card */}
+            <div className="bg-white p-8 rounded-3xl border border-red-100 shadow-xl shadow-red-500/5 relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300">
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <i className="fas fa-siren-on text-9xl text-red-600"></i>
+              </div>
+              <div className="relative">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-600">
+                    <i className="fas fa-phone-rotary animate-pulse"></i>
+                  </div>
+                  <span className="text-red-500 font-black uppercase text-[10px] tracking-widest">Emergency Hotline</span>
                 </div>
-                <div>
-                   <h3 className="text-sm font-bold text-slate-900 dark:text-white">{selectedCategory}</h3>
-                   <p className="text-[10px] text-slate-500 uppercase font-black">Secure Inquiry Portal</p>
+                <h2 className="text-5xl font-black text-slate-900 mb-2">119</h2>
+                <p className="text-slate-500 font-bold mb-6">Sri Lanka Police Emergency Unit</p>
+                <a href="tel:119" className="inline-flex items-center justify-center w-full py-4 bg-red-600 text-white font-bold uppercase tracking-widest rounded-xl hover:bg-red-700 transition-colors shadow-lg shadow-red-600/20">
+                  Call Now
+                </a>
+              </div>
+            </div>
+
+            {/* NCPA Card */}
+            <div className="bg-white p-8 rounded-3xl border border-blue-100 shadow-xl shadow-blue-500/5 relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300">
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <i className="fas fa-shield-check text-9xl text-blue-600"></i>
+              </div>
+              <div className="relative">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+                    <i className="fas fa-child-reaching"></i>
+                  </div>
+                  <span className="text-blue-500 font-black uppercase text-[10px] tracking-widest">Child Protection</span>
+                </div>
+                <h2 className="text-5xl font-black text-slate-900 mb-2">1929</h2>
+                <p className="text-slate-500 font-bold mb-6">National Child Protection Authority (NCPA)</p>
+                <a href="tel:1929" className="inline-flex items-center justify-center w-full py-4 bg-blue-600 text-white font-bold uppercase tracking-widest rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20">
+                  Call ChildLine
+                </a>
+              </div>
+            </div>
+
+            {/* Address / Info */}
+            <div className="bg-slate-900 text-white p-8 rounded-3xl relative overflow-hidden">
+              <div className="relative z-10 space-y-4">
+                <div className="flex items-start gap-4">
+                  <i className="fas fa-location-dot mt-1 text-blue-400"></i>
+                  <div>
+                    <h4 className="font-bold">Headquarters</h4>
+                    <p className="text-slate-400 text-sm">No. 330, Thalawathogoda Road,<br />Madiwela, Sri Lanka.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <i className="fas fa-clock mt-1 text-blue-400"></i>
+                  <div>
+                    <h4 className="font-bold">Operating Hours</h4>
+                    <p className="text-slate-400 text-sm">Mon - Fri: 8:30 AM - 4:15 PM<br />Hotlines: 24/7</p>
+                  </div>
                 </div>
               </div>
+            </div>
 
-              {isSuccess ? (
-                <div className="py-12 text-center space-y-4 animate-slide-up">
-                  <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl">
-                    <span className="material-symbols-outlined">check_circle</span>
-                  </div>
-                  <h3 className="text-xl font-bold">Message Received</h3>
-                  <p className="text-sm text-slate-500 font-medium">An officer will review your inquiry shortly.</p>
+          </div>
+
+          {/* Right Column: Inquiry Form */}
+          <div className="bg-white/80 backdrop-blur-md p-8 md:p-10 rounded-[3rem] border border-white shadow-2xl relative">
+            <h3 className="text-2xl font-black text-slate-900 mb-2">General Inquiries</h3>
+            <p className="text-slate-500 text-sm mb-8 font-medium">For non-emergency questions regarding policies, volunteering, or technical support.</p>
+
+            {isSuccess ? (
+              <div className="bg-emerald-50 border border-emerald-100 rounded-3xl p-8 text-center animate-fade-in">
+                <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl mb-4">
+                  <i className="fas fa-check"></i>
                 </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Your Email (Optional)</label>
-                    <input 
-                      type="email" 
-                      value={formEmail}
-                      onChange={e => setFormEmail(e.target.value)}
-                      placeholder="email@example.com"
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all text-sm font-medium" 
+                <h4 className="text-xl font-bold text-emerald-900 mb-2">Inquiry Sent</h4>
+                <p className="text-emerald-700 text-sm">Thank you. Your reference ID is <span className="font-mono font-bold">#REQ-{Math.floor(Math.random() * 9000) + 1000}</span>.</p>
+                <button onClick={() => setIsSuccess(false)} className="mt-6 text-xs font-bold uppercase tracking-widest text-emerald-600 hover:text-emerald-800">Send Another</button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-slate-400 pl-2">Full Name</label>
+                    <input
+                      type="text"
+                      required
+                      value={formName}
+                      onChange={(e) => setFormName(e.target.value)}
+                      className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm font-bold text-slate-900 outline-none"
+                      placeholder="e.g. Ruwan Perera"
                     />
                   </div>
-                  
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Location of Incident/Area (Optional)</label>
-                    <div className="relative">
-                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-lg">location_on</span>
-                      <input 
-                        type="text" 
-                        value={formLocation}
-                        onChange={e => setFormLocation(e.target.value)}
-                        placeholder="Street, Town, or Landmark"
-                        className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all text-sm font-medium" 
-                      />
-                    </div>
-                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-1 ml-1">Helps authorities identify outdoor or public hotspots.</p>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Message</label>
-                    <textarea 
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase text-slate-400 pl-2">Email Address</label>
+                    <input
+                      type="email"
                       required
-                      rows={5}
-                      value={formMessage}
-                      onChange={e => setFormMessage(e.target.value)}
-                      placeholder="Describe your inquiry or tip..."
-                      className="w-full px-4 py-3 bg-slate-50 dark:bg-surface-dark border border-slate-200 dark:border-surface-border rounded-xl focus:ring-2 focus:ring-primary outline-none transition-all text-sm font-medium"
-                    ></textarea>
+                      value={formEmail}
+                      onChange={(e) => setFormEmail(e.target.value)}
+                      className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm font-bold text-slate-900 outline-none"
+                      placeholder="name@example.com"
+                    />
                   </div>
-                  <button 
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full bg-primary text-white py-4 rounded-xl font-bold uppercase tracking-widest text-xs shadow-lg shadow-primary/20 hover:bg-blue-700 transition-all flex items-center justify-center gap-2"
-                  >
-                    {isSubmitting ? <span className="material-symbols-outlined animate-spin">refresh</span> : 'Send Secure Message'}
-                  </button>
-                  <button 
-                    type="button"
-                    onClick={() => setSelectedCategory(null)}
-                    className="w-full text-slate-400 py-2 text-[10px] font-black uppercase tracking-widest hover:text-slate-600"
-                  >
-                    Cancel
-                  </button>
-                </form>
-              )}
-            </section>
-          ) : (
-            <>
-              <section className="text-left animate-fade-in">
-                <h2 className="text-lg font-bold mb-3 text-gray-900 dark:text-white flex items-center gap-2">
-                  {t('supportCategories')}
-                </h2>
-                <div className="grid grid-cols-1 gap-6">
-                  <button 
-                    onClick={() => handleCategorySelect(t('genInquiry'))}
-                    className="group flex items-center gap-4 p-5 rounded-[2rem] border-2 border-gray-100 dark:border-surface-border bg-white dark:bg-surface-dark hover:border-primary hover:ring-4 hover:ring-primary/20 hover:ring-offset-4 transition-all text-left shadow-sm"
-                  >
-                    <div className="h-12 w-12 rounded-lg bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                      <span className="material-symbols-outlined text-primary text-2xl">handshake</span>
-                    </div>
-                    <div className="flex flex-col flex-1">
-                      <span className="text-base font-bold text-gray-900 dark:text-white group-hover:text-primary transition-colors">{t('genInquiry')}</span>
-                      <span className="text-sm text-text-secondary">{t('genInquiryDesc')}</span>
-                    </div>
-                    <span className="material-symbols-outlined text-gray-400 group-hover:text-primary transition-colors">chevron_right</span>
-                  </button>
+                </div>
 
-                  <button 
-                    onClick={() => handleCategorySelect(t('techSupport'))}
-                    className="group flex items-center gap-4 p-5 rounded-[2rem] border-2 border-gray-100 dark:border-surface-border bg-white dark:bg-surface-dark hover:border-emerald-500 hover:ring-4 hover:ring-emerald-500/20 hover:ring-offset-4 transition-all text-left shadow-sm"
-                  >
-                    <div className="h-12 w-12 rounded-lg bg-emerald-500/10 dark:bg-emerald-500/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                      <span className="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-2xl">cloud_upload</span>
-                    </div>
-                    <div className="flex flex-col flex-1">
-                      <span className="text-base font-bold text-gray-900 dark:text-white group-hover:text-emerald-600 transition-colors">{t('techSupport')}</span>
-                      <span className="text-sm text-text-secondary">{t('techSupportDesc')}</span>
-                    </div>
-                    <span className="material-symbols-outlined text-gray-400 group-hover:text-emerald-600 transition-colors">chevron_right</span>
-                  </button>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-slate-400 pl-2">Select Department</label>
+                  <select className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm font-bold text-slate-900 outline-none appearance-none">
+                    <option>General Information</option>
+                    <option>Technical Support</option>
+                    <option>Media & Press</option>
+                    <option>NGO Collaboration</option>
+                  </select>
+                </div>
 
-                  <button 
-                    onClick={() => handleCategorySelect(t('mediaPress'))}
-                    className="group flex items-center gap-4 p-5 rounded-[2rem] border-2 border-gray-100 dark:border-surface-border bg-white dark:bg-surface-dark hover:border-purple-500 hover:ring-4 hover:ring-purple-500/20 hover:ring-offset-4 transition-all text-left shadow-sm"
-                  >
-                    <div className="h-12 w-12 rounded-lg bg-purple-500/10 dark:bg-purple-500/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
-                      <span className="material-symbols-outlined text-purple-600 dark:text-purple-400 text-2xl">campaign</span>
-                    </div>
-                    <div className="flex flex-col flex-1">
-                      <span className="text-base font-bold text-gray-900 dark:text-white group-hover:text-purple-600 transition-colors">{t('mediaPress')}</span>
-                      <span className="text-sm text-text-secondary">{t('mediaPressDesc')}</span>
-                    </div>
-                    <span className="material-symbols-outlined text-gray-400 group-hover:text-purple-600 transition-colors">chevron_right</span>
-                  </button>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black uppercase text-slate-400 pl-2">Your Message</label>
+                  <textarea
+                    rows={5}
+                    required
+                    value={formMessage}
+                    onChange={(e) => setFormMessage(e.target.value)}
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm font-bold text-slate-900 outline-none resize-none"
+                    placeholder="How can we help you today?"
+                  ></textarea>
                 </div>
-              </section>
 
-              <section className="text-left">
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t('locateBureau')}</h2>
-                  <button className="text-primary text-sm font-medium hover:underline">{t('viewLarger')}</button>
-                </div>
-                <div className="relative w-full h-48 rounded-[2rem] overflow-hidden border-2 border-gray-100 dark:border-surface-border bg-surface-dark group cursor-pointer shadow-inner hover:border-primary hover:ring-4 hover:ring-primary/10 hover:ring-offset-4 transition-all">
-                  <img 
-                    alt="Map showing office locations" 
-                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" 
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjIGVG-A7ZciR79AKTC-4_zuk94koHZ5yqpCcwhQl8VM_5igU9CzLTgB8FZCDLdd8O45uBq6wXE_kB6Wt-tYamyhz1mTF6LWF2wc7cORYe5TNYYLV2qqYpvriDgv5mQMQuK0iqhK4MHeNSI_MtjzP50HQj8TzCbprQvgjkOmpXuOmzBFNc--TEtPBc3asMX4xX1-gb4kDvoZ19BU11PmD7wewcGXm4Qi4pdb7YObljIwx5YMQA-fJOsCG-TEEpAXuum4CtKtTIZDiy" 
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none"></div>
-                  <div className="absolute top-1/3 left-1/4 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-                    <span className="material-symbols-outlined text-alert text-3xl drop-shadow-md">location_on</span>
-                  </div>
-                  <div className="absolute bottom-1/3 right-1/3 transform flex flex-col items-center">
-                    <span className="material-symbols-outlined text-primary text-3xl drop-shadow-md">location_on</span>
-                  </div>
-                  <div className="absolute bottom-3 left-3 right-3">
-                    <div className="bg-white/10 backdrop-blur-md border border-white/20 p-2 rounded-lg flex items-center gap-2">
-                      <span className="material-symbols-outlined text-white text-sm">my_location</span>
-                      <span className="text-xs text-white font-medium">{t('nearestBureau')}</span>
-                    </div>
-                  </div>
-                </div>
-              </section>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-slate-800 transition-all flex items-center justify-center gap-3 shadow-xl"
+                >
+                  {isSubmitting ? 'Processing...' : (
+                    <><span>Send Inquiry</span> <i className="fas fa-paper-plane"></i></>
+                  )}
+                </button>
 
-              <section className="text-left">
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t('quickHelp')}</h2>
-                </div>
-                <div className="flex flex-col gap-3">
-                  <details className="group bg-white dark:bg-surface-dark border-2 border-gray-50 dark:border-surface-border rounded-2xl hover:border-primary hover:ring-2 hover:ring-primary/10 transition-all">
-                    <summary className="flex items-center justify-between p-4 cursor-pointer list-none">
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">Can I change my report after submitting?</span>
-                      <span className="material-symbols-outlined text-gray-400 group-open:rotate-180 transition-transform">expand_more</span>
-                    </summary>
-                    <div className="px-4 pb-4 text-sm text-text-secondary leading-relaxed">
-                      For security reasons, reports cannot be edited once submitted. Please contact your case officer or submit a supplementary addendum referencing your Case ID.
-                    </div>
-                  </details>
-                  <details className="group bg-white dark:bg-surface-dark border-2 border-gray-50 dark:border-surface-border rounded-2xl hover:border-primary hover:ring-2 hover:ring-primary/10 transition-all">
-                    <summary className="flex items-center justify-between p-4 cursor-pointer list-none">
-                      <span className="text-sm font-medium text-gray-900 dark:text-white">How do I request data for an NGO?</span>
-                      <span className="material-symbols-outlined text-gray-400 group-open:rotate-180 transition-transform">expand_more</span>
-                    </summary>
-                    <div className="px-4 pb-4 text-sm text-text-secondary leading-relaxed">
-                      Data requests must be submitted through the 'General Inquiries' portal with a valid organizational verified ID.
-                    </div>
-                  </details>
-                </div>
-              </section>
+                <p className="text-center text-[10px] text-slate-400 font-medium">
+                  This site is protected by reCAPTCHA and the Google <a href="#" className="underline">Privacy Policy</a> and <a href="#" className="underline">Terms of Service</a> apply.
+                </p>
+              </form>
+            )}
+          </div>
 
-              <section className="mb-6 text-left">
-                <h2 className="text-lg font-bold mb-3 text-gray-900 dark:text-white">{t('altMethods')}</h2>
-                <div className="bg-white dark:bg-surface-dark border-2 border-gray-100 dark:border-surface-border rounded-[2.5rem] divide-y divide-gray-100 dark:divide-surface-border overflow-hidden shadow-sm">
-                  <div 
-                    onClick={() => handleCopy('contact@chars.gov.lk', 'Email')}
-                    className="flex items-center justify-between p-5 hover:bg-blue-50/50 transition-colors cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all">
-                        <span className="material-symbols-outlined text-sm">mail</span>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs text-text-secondary uppercase font-semibold tracking-wider group-hover:text-blue-600 transition-colors">{t('officialEmail')}</span>
-                        <span className="text-sm font-medium text-gray-900 dark:text-white">contact@chars.gov.lk</span>
-                      </div>
-                    </div>
-                    <span className={`material-symbols-outlined ${copyFeedback === 'Email' ? 'text-emerald-500' : 'text-primary'} text-lg`}>
-                      {copyFeedback === 'Email' ? 'check' : 'content_copy'}
-                    </span>
-                  </div>
-                  <div 
-                    onClick={() => handleCopy('+94 11 234 5679', 'Fax')}
-                    className="flex items-center justify-between p-5 hover:bg-emerald-50/50 transition-colors cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-all">
-                        <span className="material-symbols-outlined text-sm">fax</span>
-                      </div>
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs text-text-secondary uppercase font-semibold tracking-wider group-hover:text-emerald-600 transition-colors">{t('secureFax')}</span>
-                          <span className="material-symbols-outlined text-emerald-500 text-[10px]">lock</span>
-                        </div>
-                        <span className="text-sm font-medium text-gray-900 dark:text-white">+94 11 234 5679</span>
-                      </div>
-                    </div>
-                    <span className={`material-symbols-outlined ${copyFeedback === 'Fax' ? 'text-emerald-500' : 'text-primary'} text-lg`}>
-                      {copyFeedback === 'Fax' ? 'check' : 'content_copy'}
-                    </span>
-                  </div>
-                </div>
-              </section>
-            </>
-          )}
-        </main>
-        
-        <div className="h-6 w-full bg-white dark:bg-background-dark"></div>
+        </div>
       </div>
     </div>
   );

@@ -4,7 +4,7 @@
     "description": "Child Harassment & Abuse Reporting System",
     "scripts": {
         "install:all": "npm install && cd \"frontend\" && npm install",
-        "backend": "go run .",
+        "backend": "cd backend && go run .",
         "frontend": "cd \"frontend\" && npm run dev",
         "dev": "concurrently \"npm run backend\" \"npm run frontend\""
     },

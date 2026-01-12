@@ -1,29 +1,34 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from '../context/LanguageContext';
-import { imageService } from '../services/imageService';
+import heroBg from '../hero_bg.png';
 
-const FeatureCard = ({ icon, title, description, color, hoverBorder, hoverRing, onClick, to }: { 
-  icon: string; 
-  title: string; 
-  description: string; 
-  color: string; 
-  hoverBorder: string; 
-  hoverRing: string;
-  onClick?: () => void;
+const FeatureCard = ({ icon, title, description, to, onClick, highlight = false }: {
+  icon: string;
+  title: string;
+  description: string;
   to?: string;
+  onClick?: () => void;
+  highlight?: boolean;
 }) => {
   const content = (
-    <div className={`h-full bg-white p-8 rounded-[2.5rem] shadow-sm border-2 border-slate-100 ${hoverBorder} ${hoverRing} hover:ring-offset-8 hover:scale-[1.02] hover:-translate-y-3 transition-all duration-500 cursor-pointer group relative text-left w-full ring-1 ring-slate-900/5`}>
-      <div className={`w-14 h-14 ${color} rounded-2xl flex items-center justify-center mb-8 text-2xl shadow-inner group-hover:scale-110 transition-transform duration-500`}>
+    <div className={`h-full p-8 rounded-xl border transition-all duration-300 group relative text-left w-full
+      ${highlight
+        ? 'bg-blue-600 text-white border-blue-500 shadow-xl shadow-blue-900/20'
+        : 'bg-white text-slate-800 border-slate-200 hover:border-blue-300 hover:shadow-lg hover:-translate-y-1'
+      }`}>
+      <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-6 text-xl transition-transform duration-300 group-hover:scale-110
+         ${highlight ? 'bg-white/20 text-white' : 'bg-blue-50 text-blue-600'}`}>
         <i className={`fas ${icon}`}></i>
       </div>
-      <h3 className="text-xl font-black text-slate-900 mb-4 tracking-tight group-hover:text-blue-600 transition-colors uppercase text-[15px] tracking-widest">{title}</h3>
-      <p className="text-slate-600 leading-relaxed text-sm font-medium">{description}</p>
-      <div className="mt-6 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
-        Secure Access <i className="fas fa-arrow-right"></i>
-      </div>
+      <h3 className={`text-lg font-bold mb-3 ${highlight ? 'text-white' : 'text-slate-900'}`}>{title}</h3>
+      <p className={`text-sm leading-relaxed ${highlight ? 'text-blue-100' : 'text-slate-600'}`}>{description}</p>
+
+      {!highlight && (
+        <div className="mt-6 flex items-center gap-2 text-xs font-bold text-blue-600 uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">
+          Access Portal <i className="fas fa-arrow-right"></i>
+        </div>
+      )}
     </div>
   );
 
@@ -33,170 +38,152 @@ const FeatureCard = ({ icon, title, description, color, hoverBorder, hoverRing, 
 
 export default function LandingPage() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const [bgImage, setBgImage] = useState<string | null>(null);
-  const [isGenerating, setIsGenerating] = useState(true);
-
-  useEffect(() => {
-    const fetchBackground = async () => {
-      setIsGenerating(true);
-      const image = await imageService.generateHeroBackground();
-      if (image) setBgImage(image);
-      setIsGenerating(false);
-    };
-    fetchBackground();
-  }, []);
 
   const triggerVoiceAssistant = () => {
     window.dispatchEvent(new CustomEvent('toggle-voice-assistant'));
   };
 
   return (
-    <div className="space-y-32 pb-32 overflow-x-hidden">
-      {/* Official Gov Header */}
-      <div className="bg-slate-950 text-white/60 py-2 px-4 flex justify-center items-center gap-4 text-[9px] font-black uppercase tracking-[0.3em] border-b border-white/5">
-         <div className="flex items-center gap-2"><i className="fas fa-landmark text-blue-400"></i> Government of Sri Lanka</div>
-         <div className="w-1 h-1 bg-white/20 rounded-full"></div>
-         <div className="flex items-center gap-2"><i className="fas fa-shield-halved text-blue-400"></i> Authorized Portal</div>
+    <div className="bg-slate-50 min-h-screen font-sans">
+
+      {/* 1. Official Ribbon (30% Color - Navy/Dark) */}
+      <div className="bg-slate-900 text-slate-300 py-3 px-4 border-b border-slate-800">
+        <div className="max-w-7xl mx-auto flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
+          <div className="flex items-center gap-3">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5f/Emblem_of_Sri_Lanka.svg" alt="Emblem" className="h-6 w-auto opacity-80" />
+            <span>Government of Sri Lanka Official Portal</span>
+          </div>
+          <div className="hidden md:flex items-center gap-4">
+            <span className="flex items-center gap-2"><i className="fas fa-lock text-emerald-500"></i> Secure Connection</span>
+            <span className="flex items-center gap-2"><i className="fas fa-clock text-blue-500"></i> 24/7 Monitoring</span>
+          </div>
+        </div>
       </div>
 
-      <section className="relative pt-24 pb-32 px-4 overflow-hidden min-h-[700px] flex items-center">
-        <div 
-          className="absolute top-0 left-0 w-full h-full -z-10 transition-opacity duration-1000 ease-in-out"
-          style={{
-            backgroundImage: bgImage ? `url(${bgImage})` : 'none',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            opacity: bgImage ? 0.4 : 0
-          }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-b from-white via-white/80 to-white"></div>
+      {/* 2. Hero Section with Trust Image */}
+      <section className="relative bg-slate-900 overflow-hidden min-h-[600px] flex items-center">
+        {/* Background Image with Overlay */}
+        <div className="absolute inset-0 z-0">
+          <img src={heroBg} alt="Child Protection" className="w-full h-full object-cover opacity-60" />
+          {/* Gradient Overlay for Text Readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/90 to-blue-900/60"></div>
         </div>
 
-        <div className="max-w-7xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-3 bg-blue-600 text-white px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.3em] mb-12 animate-fade-in shadow-2xl shadow-blue-500/30 border border-blue-400">
-            <i className={`fas ${isGenerating ? 'fa-circle-notch fa-spin' : 'fa-certificate'}`}></i> 
-            {isGenerating ? 'Initialising Secure Layers...' : 'Department of Child Protection'}
-          </div>
-          
-          <h1 className="text-6xl md:text-8xl font-black text-slate-950 mb-10 tracking-tighter leading-[0.9] drop-shadow-sm uppercase">
-            {t('heroTitle').split(',')[0]}<br/>
-            <span className="text-blue-600">{t('heroTitle').split(',')[1]}</span>
-          </h1>
-          
-          <p className="text-xl text-slate-500 max-w-3xl mx-auto mb-16 leading-relaxed font-bold">
-            {t('heroDesc')}
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-            <Link to="/report" className="w-full sm:w-auto bg-slate-950 text-white px-12 py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] hover:bg-blue-600 transition-all shadow-2xl shadow-slate-900/20 flex items-center justify-center gap-4 group">
-              <i className="fas fa-paper-plane group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i> Launch Report Portal
-            </Link>
-            <Link to="/status" className="w-full sm:w-auto bg-white text-slate-900 border-2 border-slate-200 px-12 py-6 rounded-[2rem] font-black text-xs uppercase tracking-[0.3em] hover:border-slate-950 transition-all flex items-center justify-center gap-4">
-              <i className="fas fa-search"></i> Case Verification
-            </Link>
-          </div>
-        </div>
-
-        {/* Floating Official Seal Decoration */}
-        <div className="absolute top-1/2 -right-20 -translate-y-1/2 opacity-[0.03] select-none pointer-events-none hidden lg:block">
-           <i className="fas fa-shield-cat text-[40rem]"></i>
-        </div>
-      </section>
-
-      {/* Trust/Legal Section */}
-      <section className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 gap-20 items-center">
-         <div className="space-y-10">
-            <div className="space-y-4">
-               <span className="text-blue-600 text-[10px] font-black uppercase tracking-[0.4em]">Privacy Protocol</span>
-               <h2 className="text-4xl font-black text-slate-950 tracking-tight uppercase leading-tight">Your Identity is <br/>End-to-End Encrypted</h2>
+        <div className="max-w-7xl mx-auto px-6 relative z-10 w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="text-left space-y-8">
+            <div className="inline-flex items-center gap-2 bg-blue-600/30 text-blue-200 border border-blue-500/50 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest backdrop-blur-sm">
+              <i className="fas fa-shield-halved"></i> National Child Protection Authority
             </div>
-            <p className="text-slate-500 font-bold leading-relaxed">
-               In accordance with the National Data Privacy Act, CHARS employs military-grade AES-256 encryption. Your report metadata is automatically scrubbed, ensuring that your courage remains confidential.
+
+            <h1 className="text-5xl md:text-6xl font-black text-white leading-tight tracking-tight">
+              Protecting Children <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">Empowering Citizens</span>
+            </h1>
+
+            <p className="text-lg text-slate-300 max-w-xl leading-relaxed font-medium">
+              The Child Harassment & Abuse Reporting System (CHARS) provides a secure, anonymous bridge to justice. Every report is investigated.
             </p>
-            <div className="grid grid-cols-2 gap-6">
-               <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
-                  <i className="fas fa-user-secret text-blue-600 text-2xl mb-4"></i>
-                  <h4 className="text-xs font-black uppercase tracking-widest text-slate-950 mb-2">No IP Logging</h4>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase">Metadata Purge Enabled</p>
-               </div>
-               <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
-                  <i className="fas fa-fingerprint text-blue-600 text-2xl mb-4"></i>
-                  <h4 className="text-xs font-black uppercase tracking-widest text-slate-950 mb-2">Verified Hub</h4>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase">Police Network Direct</p>
-               </div>
+
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              {/* Primary Action (10% Color - Red/Action) */}
+              <Link to="/report" className="bg-red-600 text-white px-8 py-4 rounded-lg font-bold text-sm uppercase tracking-wider hover:bg-red-700 transition-colors shadow-lg shadow-red-600/30 flex items-center justify-center gap-3">
+                <i className="fas fa-exclamation-circle"></i> Submit Report
+              </Link>
+
+              {/* Secondary Action (30% Color - Blue/Neutral) */}
+              <Link to="/status" className="bg-white/10 text-white border border-white/20 px-8 py-4 rounded-lg font-bold text-sm uppercase tracking-wider hover:bg-white/20 transition-all backdrop-blur-sm flex items-center justify-center gap-3">
+                <i className="fas fa-search"></i> Track Status
+              </Link>
             </div>
-         </div>
-         <div className="relative">
-            <div className="aspect-square bg-slate-900 rounded-[4rem] p-12 flex flex-col justify-center text-white relative overflow-hidden shadow-2xl border-b-8 border-blue-600">
-               <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/20 rounded-full blur-3xl -mr-32 -mt-32"></div>
-               <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-2xl mb-8">
-                  <i className="fas fa-balance-scale"></i>
-               </div>
-               <h3 className="text-3xl font-black mb-6 tracking-tight uppercase leading-tight">The Child's <br/>Rights Charter</h3>
-               <p className="text-blue-200 font-bold mb-8 leading-relaxed italic">"Every report is a lifeline. We ensure that every submission receives a forensic review by a qualified duty officer within 60 minutes."</p>
-               <div className="flex items-center gap-4 pt-8 border-t border-white/10">
-                  <div className="w-12 h-12 bg-white/10 rounded-full flex items-center justify-center font-black">SL</div>
-                  <div>
-                     <p className="text-[10px] font-black uppercase tracking-widest">National Bureau of Protection</p>
-                     <p className="text-[8px] text-white/40 uppercase font-black">Authorized Operations Center</p>
+          </div>
+
+          {/* Hero Card/Stats - Optional "Trust" Element */}
+          <div className="hidden lg:block">
+            <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-8 max-w-md ml-auto">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-white text-xl">
+                  <i className="fas fa-check"></i>
+                </div>
+                <div>
+                  <h4 className="text-white font-bold">System Operational</h4>
+                  <p className="text-slate-400 text-xs">Duty Officers Online</p>
+                </div>
+              </div>
+              <div className="space-y-4">
+                <div className="bg-white/5 rounded-lg p-4">
+                  <div className="flex justify-between text-xs text-slate-300 mb-1">
+                    <span>Response Time</span>
+                    <span className="text-emerald-400 font-bold">&lt; 15 Mins</span>
                   </div>
-               </div>
+                  <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full w-[85%] bg-emerald-500"></div>
+                  </div>
+                </div>
+                <div className="bg-white/5 rounded-lg p-4">
+                  <div className="flex justify-between text-xs text-slate-300 mb-1">
+                    <span>Action Rate</span>
+                    <span className="text-blue-400 font-bold">98.2%</span>
+                  </div>
+                  <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                    <div className="h-full w-[98%] bg-blue-500"></div>
+                  </div>
+                </div>
+              </div>
             </div>
-         </div>
+          </div>
+        </div>
       </section>
 
-      <section className="max-w-7xl mx-auto px-4">
-        <div className="text-center mb-20">
-           <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.5em] mb-4">Core Safety Infrastructure</h2>
-           <div className="w-12 h-1 bg-blue-600 mx-auto rounded-full"></div>
+      {/* 3. Features Section (60% Color - White/Clean) */}
+      <section className="py-24 max-w-7xl mx-auto px-6">
+        <div className="text-center mb-16 space-y-4">
+          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Core Safety Infrastructure</h2>
+          <p className="text-slate-500 max-w-2xl mx-auto">Built on military-grade encryption protocols to ensure reporter safety and data integrity.</p>
+          <div className="w-16 h-1 bg-blue-600 mx-auto rounded-full"></div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-          <FeatureCard 
-            icon="fa-mask"
-            title={t('anonymousTitle')}
-            description={t('anonymousDesc')}
-            color="bg-slate-900 text-white"
-            hoverBorder="hover:border-slate-950"
-            hoverRing="hover:ring-4 hover:ring-slate-900/10"
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <FeatureCard
+            icon="fa-user-secret"
+            title="Anonymous Reporting"
+            description="Submit reports without revealing your identity. We use advanced metadata scrubbing to protect your digital footprint."
             to="/report"
           />
-          <FeatureCard 
+          <FeatureCard
             icon="fa-microphone-lines"
-            title={t('voiceTitle')}
-            description={t('voiceDesc')}
-            color="bg-blue-600 text-white"
-            hoverBorder="hover:border-blue-600"
-            hoverRing="hover:ring-4 hover:ring-blue-600/20"
+            title="Voice Assistant"
+            description="Accessibility-first design allows for voice-guided reporting for faster intake during emergencies."
             onClick={triggerVoiceAssistant}
+            highlight={true}
           />
-          <FeatureCard 
-            icon="fa-vault"
-            title="Evidence Vault"
-            description="Forensic data is secured in a centralized national vault with biometric access protocols for officers."
-            color="bg-emerald-600 text-white"
-            hoverBorder="hover:border-emerald-500"
-            hoverRing="hover:ring-4 hover:ring-emerald-500/20"
+          <FeatureCard
+            icon="fa-shield-cat" // Changed icon for variety
+            title="End-to-End Encryption"
+            description="All data is encrypted in transit and at rest using AES-256 standards. Only authorized officers hold the decryption keys."
             to="/about"
           />
         </div>
       </section>
 
-      {/* Final Safety Notice */}
-      <section className="max-w-4xl mx-auto text-center px-4">
-         <div className="bg-slate-50 p-12 rounded-[3.5rem] border-2 border-slate-100 ring-1 ring-slate-900/5">
-            <i className="fas fa-circle-exclamation text-red-600 text-4xl mb-6"></i>
-            <h3 className="text-xl font-black text-slate-950 mb-4 uppercase tracking-widest">Immediate Danger Notice</h3>
-            <p className="text-slate-500 font-bold mb-8 leading-relaxed">
-               If a child is in immediate physical danger, please do not use this portal. <br/> Call the Emergency Services Dispatch directly at <span className="text-red-600">911</span> or <span className="text-red-600">1929</span> (Sri Lanka).
-            </p>
-            <div className="flex justify-center gap-6 text-[10px] font-black uppercase tracking-widest text-slate-400">
-               <span className="flex items-center gap-2"><i className="fas fa-check-circle text-emerald-500"></i> ISO 27001</span>
-               <span className="flex items-center gap-2"><i className="fas fa-check-circle text-emerald-500"></i> SSL Secure</span>
-               <span className="flex items-center gap-2"><i className="fas fa-check-circle text-emerald-500"></i> GDPR Ready</span>
-            </div>
-         </div>
+      {/* 4. Action Banner (Blue/Red Context) */}
+      <section className="bg-slate-900 text-white py-20 border-t border-slate-800">
+        <div className="max-w-4xl mx-auto text-center px-6">
+          <i className="fas fa-triangle-exclamation text-amber-500 text-4xl mb-6"></i>
+          <h2 className="text-2xl font-bold mb-4">Is a child in immediate danger?</h2>
+          <p className="text-slate-400 mb-8 max-w-2xl mx-auto">
+            This portal is for reporting incidents for investigation. If there is an ongoing emergency or life-threatening situation, do not use this website.
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center gap-4">
+            <a href="tel:119" className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-lg font-bold text-lg transition-colors flex items-center justify-center gap-2">
+              <i className="fas fa-phone"></i> Call 119
+            </a>
+            <a href="tel:1929" className="bg-white/10 hover:bg-white/20 text-white px-8 py-3 rounded-lg font-bold text-lg transition-colors flex items-center justify-center gap-2">
+              <i className="fas fa-phone"></i> Call 1929 (Child Line)
+            </a>
+          </div>
+        </div>
       </section>
+
     </div>
   );
 }
