@@ -38,9 +38,14 @@ func main() {
 	log.Println("🚀 CHARS BACKEND UPDATED v2.0 - INQUIRIES FIXED")
 	defer db.Close(ctx, client)
 
+	// Initialize WebSocket Hub
+	hub := controllers.NewHub(client)
+	go hub.Run()
+
 	r := mux.NewRouter()
 
 	// Public Endpoints
+	r.HandleFunc("/ws", controllers.HandleWS(hub))
 	r.HandleFunc("/submit-report", controllers.CreateReport(client)).Methods(http.MethodPost)
 	r.HandleFunc("/report-status", controllers.ListReports(client)).Queries("id", "{id}").Methods(http.MethodGet)
 	r.HandleFunc("/admin-login", controllers.AdminLogin(client)).Methods(http.MethodPost)

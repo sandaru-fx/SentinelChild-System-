@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -42,20 +43,24 @@ func StartChatSession(client *mongo.Client) http.HandlerFunc {
 		col := chatCollection(client)
 		var session models.ChatSession
 
-		// Try to find active session for this user
+		// Try to find active session for this user by unique sessionId (UUID)
 		err := col.FindOne(context.Background(), bson.M{
-			"userPhone": req.UserPhone,
+			"sessionId": req.UserID, // Note: UserID from frontend is used as sessionId here
 			"status":    "ACTIVE",
 		}).Decode(&session)
 
 		if err == mongo.ErrNoDocuments {
+			// Get IP for blocking logic
+			ip, _, _ := net.SplitHostPort(r.RemoteAddr)
+
 			// Create new session
 			now := time.Now()
 			session = models.ChatSession{
-				SessionID:   fmt.Sprintf("SESSION-%d", now.Unix()),
+				SessionID:   req.UserID, // Use the UUID provided by frontend
 				UserID:      req.UserID,
 				UserPhone:   req.UserPhone,
 				UserName:    req.UserName,
+				IP:          ip,
 				Messages:    []models.ChatMessage{},
 				Status:      "ACTIVE",
 				UnreadCount: 0,
@@ -67,9 +72,10 @@ func StartChatSession(client *mongo.Client) http.HandlerFunc {
 			greeting := models.ChatMessage{
 				ID:         fmt.Sprintf("BOT-%d", now.Unix()),
 				SenderID:   "bot",
-				SenderName: "CHARS AI",
-				Text:       fmt.Sprintf("Hello %s, how can I help you today? Your safety is our priority.", req.UserName),
+				SenderName: "CHARS SafeGuard",
+				Text:       fmt.Sprintf("Pin sidda wenawa %s machan meyata sambanda unata. Api okkoma ekathu wela me loka wala inna innocent childrenwa save karagamu. Kohomada ada mawa help karanna puluwan?", req.UserName),
 				Timestamp:  now,
+				Status:     "DELIVERED",
 			}
 			session.Messages = append(session.Messages, greeting)
 
@@ -113,7 +119,9 @@ func SendMessage(client *mongo.Client) http.HandlerFunc {
 		}
 
 		msg.Timestamp = time.Now()
-		msg.ID = fmt.Sprintf("MSG-%d", msg.Timestamp.Unix())
+		if msg.ID == "" {
+			msg.ID = fmt.Sprintf("MSG-%d", msg.Timestamp.Unix())
+		}
 
 		col := chatCollection(client)
 		update := bson.M{

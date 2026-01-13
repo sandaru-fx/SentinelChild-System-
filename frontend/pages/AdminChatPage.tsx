@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { api } from '../services/api';
-import { mockApi } from '../services/mockApi';
 import { Admin, ChatSession } from '../types';
+import AdminChatQueue from '../components/AdminChatQueue';
 
 export default function AdminChatPage({ user }: { user: Admin | null }) {
     const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
     const [selectedSession, setSelectedSession] = useState<ChatSession | null>(null);
     const [chatInput, setChatInput] = useState('');
     const [notification, setNotification] = useState<{ title: string, msg: string } | null>(null);
+    const socketRef = useRef<WebSocket | null>(null);
     const chatEndRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -16,39 +17,81 @@ export default function AdminChatPage({ user }: { user: Admin | null }) {
         }
     }, [selectedSession?.messages]);
 
+    const selectedSessionRef = useRef<ChatSession | null>(null);
+
     useEffect(() => {
-        if (!user?.token) return;
-        fetchChats();
+        selectedSessionRef.current = selectedSession;
+    }, [selectedSession]);
 
-        const chatInterval = setInterval(async () => {
-            if (!user?.token) return;
-            const sessions = await api.getChatSessions(user.token);
+    useEffect(() => {
+        if (selectedSession && socketRef.current?.readyState === WebSocket.OPEN) {
+            console.log('👁️ Sending Seen Event for:', selectedSession.sessionId);
+            socketRef.current.send(JSON.stringify({
+                type: 'seen',
+                sessionId: selectedSession.sessionId
+            }));
+        }
+    }, [selectedSession?.messages?.length, selectedSession?.sessionId]);
 
-            // Notifications logic
-            sessions.forEach(sess => {
-                const oldSess = chatSessions.find(s => s.sessionId === sess.sessionId);
-                if (oldSess && sess.messages.length > oldSess.messages.length) {
-                    const lastMsg = sess.messages[sess.messages.length - 1];
-                    if (lastMsg.senderId === 'user' && selectedSession?.sessionId !== sess.sessionId) {
-                        setNotification({ title: `New Message: ${sess.userName}`, msg: lastMsg.text });
-                        setTimeout(() => setNotification(null), 5000);
+    useEffect(() => {
+        if (!user?.token || !user?.id) return;
+
+        console.log('🔄 Attempting Admin WS Connection...');
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const socket = new WebSocket(`${protocol}//${window.location.hostname}:8080/ws?role=admin&id=${user.id}`);
+        socketRef.current = socket;
+
+        socket.onopen = () => {
+            console.log('✅ Admin WS Connected');
+            fetchChats();
+        };
+
+        socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            console.log('📩 Admin Received WS Message:', data);
+
+            if (data.type === 'queue_update') {
+                setChatSessions(data.payload.sort((a: any, b: any) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()));
+            } else if (data.type === 'chat') {
+                const msg = data.payload;
+                const targetSessionId = data.sessionId;
+
+                setChatSessions(prev => {
+                    const exists = prev.find(s => s.sessionId === targetSessionId);
+                    if (exists) {
+                        return prev.map(s => {
+                            if (s.sessionId === targetSessionId) {
+                                return {
+                                    ...s,
+                                    messages: [...s.messages, msg],
+                                    updatedAt: new Date().toISOString(),
+                                    unreadCount: selectedSessionRef.current?.sessionId === targetSessionId ? 0 : (s.unreadCount || 0) + 1
+                                };
+                            }
+                            return s;
+                        });
+                    } else {
+                        // If it doesn't exist, we might have missed the queue update. 
+                        fetchChats();
+                        return prev;
                     }
-                }
-            });
+                });
 
-            setChatSessions(sessions.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()));
-
-            if (selectedSession) {
-                const updated = sessions.find(s => s.sessionId === selectedSession.sessionId);
-                if (updated) {
-                    setSelectedSession(updated);
-                    // Mark as read logic would go here
+                if (selectedSessionRef.current?.sessionId === targetSessionId) {
+                    setSelectedSession(prev => prev ? { ...prev, messages: [...prev.messages, msg] } : null);
+                } else if (msg.senderId === 'user') {
+                    setNotification({ title: `New Message`, msg: msg.text });
+                    setTimeout(() => setNotification(null), 5000);
                 }
             }
-        }, 3000);
+        };
 
-        return () => clearInterval(chatInterval);
-    }, [user, chatSessions, selectedSession]);
+        socket.onclose = () => console.log('❌ Admin WS Disconnected');
+
+        return () => {
+            socket.close();
+        };
+    }, [user?.token, user?.id]); // Only reset if user changes
 
     const fetchChats = async () => {
         if (!user?.token) return;
@@ -56,22 +99,43 @@ export default function AdminChatPage({ user }: { user: Admin | null }) {
         setChatSessions(sessions.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()));
     };
 
-    const handleSendChat = async (e: React.FormEvent) => {
+    const handleSendChat = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!chatInput.trim() || !selectedSession || !user) return;
-        await api.sendMessage(selectedSession.sessionId, user.id, user.name, chatInput);
+        if (!chatInput.trim() || !selectedSession || !user || !socketRef.current) return;
+
+        const chatMsg = {
+            id: `MSG-${Date.now()}`,
+            senderId: user.id || 'admin',
+            senderName: user.name,
+            text: chatInput,
+            timestamp: new Date().toISOString()
+        };
+
+        socketRef.current.send(JSON.stringify({
+            type: 'chat',
+            sessionId: selectedSession.sessionId,
+            payload: chatMsg
+        }));
+
+        setChatSessions(prev => prev.map(s =>
+            s.sessionId === selectedSession.sessionId
+                ? { ...s, messages: [...s.messages, chatMsg], updatedAt: new Date().toISOString() }
+                : s
+        ));
+        setSelectedSession(prev => prev ? { ...prev, messages: [...prev.messages, chatMsg] } : null);
         setChatInput('');
-        fetchChats();
     };
 
     const handleBlockUser = async () => {
-        if (!selectedSession || !window.confirm(`Block ${selectedSession.userName} permanently?`)) return;
-        const reason = prompt("Reason for block:");
-        if (reason) {
-            await mockApi.blockUser(selectedSession.userId, selectedSession.userPhone, reason);
-            fetchChats();
-            setSelectedSession(null);
-        }
+        if (!selectedSession || !window.confirm(`Block user by IP: ${selectedSession.ip}?`)) return;
+        // In real system, this would call an API to add IP to blacklist
+        alert(`User with IP ${selectedSession.ip} has been blocked.`);
+        setSelectedSession(null);
+    };
+
+    const handleAcceptChat = (sess: ChatSession) => {
+        setSelectedSession(sess);
+        // Optional: Send "accept" event to backend if needed
     };
 
     return (
@@ -89,41 +153,13 @@ export default function AdminChatPage({ user }: { user: Admin | null }) {
                 </div>
             )}
 
-            {/* Sidebar */}
-            <div className="w-80 flex flex-col bg-[var(--color-surface)] border-r border-[var(--color-border)]">
-                <div className="p-4 border-b border-[var(--color-border)]">
-                    <h2 className="font-bold text-[var(--color-text-primary)] mb-4">Live Support</h2>
-                    <input
-                        type="text"
-                        placeholder="Search chats..."
-                        className="w-full px-4 py-2 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                    />
-                </div>
-                <div className="flex-grow overflow-y-auto">
-                    {chatSessions.map(sess => (
-                        <button
-                            key={sess.id}
-                            onClick={() => setSelectedSession(sess)}
-                            className={`w-full text-left p-4 hover:bg-[var(--color-bg)] transition-colors border-b border-[var(--color-border)] last:border-0 ${selectedSession?.id === sess.id ? 'bg-blue-50 dark:bg-blue-900/10' : ''
-                                }`}
-                        >
-                            <div className="flex justify-between items-center mb-1">
-                                <span className={`font-semibold text-sm ${sess.unreadCount > 0 ? 'text-blue-600' : 'text-[var(--color-text-primary)]'}`}>
-                                    {sess.userName}
-                                </span>
-                                {sess.unreadCount > 0 && (
-                                    <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{sess.unreadCount}</span>
-                                )}
-                            </div>
-                            <p className="text-xs text-[var(--color-text-secondary)] truncate">{sess.messages[sess.messages.length - 1]?.text || 'No messages'}</p>
-                            <div className="mt-2 flex items-center gap-2">
-                                <span className={`w-2 h-2 rounded-full ${sess.status === 'ACTIVE' ? 'bg-emerald-500' : 'bg-slate-300'}`}></span>
-                                <span className="text-[10px] uppercase text-[var(--color-text-secondary)] tracking-wider">{sess.status}</span>
-                            </div>
-                        </button>
-                    ))}
-                </div>
-            </div>
+            {/* Sidebar / Queue */}
+            <AdminChatQueue
+                sessions={chatSessions}
+                onAccept={handleAcceptChat}
+                onView={setSelectedSession}
+                activeSessionId={selectedSession?.sessionId}
+            />
 
             {/* Chat Area */}
             <div className="flex-grow flex flex-col bg-[var(--color-bg)]">

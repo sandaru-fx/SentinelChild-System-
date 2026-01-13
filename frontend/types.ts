@@ -62,6 +62,7 @@ export interface ChatMessage {
   senderName: string;
   text: string;
   timestamp: string;
+  status?: 'SENT' | 'DELIVERED' | 'SEEN';
   isEdited?: boolean;
 }
 
@@ -74,6 +75,7 @@ export interface ChatSession {
   messages: ChatMessage[];
   status: 'ACTIVE' | 'CLOSED' | 'BLOCKED';
   unreadCount: number;
+  ip?: string;
   createdAt: string;
   updatedAt: string;
 }

@@ -16,20 +16,35 @@ interface ValidationErrors {
 
 export default function LiveChat({ externalOpen, setExternalOpen }: LiveChatProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [step, setStep] = useState<'LOGIN' | 'OTP' | 'CHOICE' | 'CHAT'>('LOGIN');
-  const [userId, setUserId] = useState('');
-  const [phone, setPhone] = useState('');
-  const [name, setName] = useState('');
-  const [otp, setOtp] = useState('');
-  const [correctOtp, setCorrectOtp] = useState('');
-  const [session, setSession] = useState<ChatSession | null>(null);
-  const [existingSessions, setExistingSessions] = useState<ChatSession[]>([]);
-  const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [isBlocked, setIsBlocked] = useState(false);
-  const [errors, setErrors] = useState<ValidationErrors>({});
+  const [step, setStep] = useState<'GREETING' | 'CHAT'>('GREETING');
+  const [nickName, setNickName] = useState('');
+  const [sessionId, setSessionId] = useState<string>(() => {
+    const saved = localStorage.getItem('chars_chat_session');
+    if (saved) return saved;
+    const newId = `SESS-${Math.random().toString(36).substr(2, 9)}`;
+    localStorage.setItem('chars_chat_session', newId);
+    return newId;
+  });
 
+  const [session, setSession] = useState<ChatSession | null>(null);
+  const [input, setInput] = useState('');
+  const [isBlocked, setIsBlocked] = useState(false);
+  const socketRef = useRef<WebSocket | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Check if we already have a session in DB with a name
+    const checkExisting = async () => {
+      if (sessionId) {
+        const savedName = localStorage.getItem('chars_chat_name');
+        if (savedName) {
+          setNickName(savedName);
+          setStep('CHAT');
+        }
+      }
+    };
+    checkExisting();
+  }, [sessionId]);
 
   useEffect(() => {
     if (externalOpen !== undefined) setIsOpen(externalOpen);
@@ -42,104 +57,99 @@ export default function LiveChat({ externalOpen, setExternalOpen }: LiveChatProp
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [session?.messages, step]);
+  }, [session?.messages]);
 
   useEffect(() => {
-    let interval: any;
-    if (step === 'CHAT' && session) {
-      interval = setInterval(async () => {
-        // For public chat, we don't have a token, but startChatSession 
-        // returned the session. For this demo, we'll just re-fetch using a logic
-        // that matches our backend. But handleLogin/startNewChat already sets the session.
-        // In a real app, you'd poll a specific session endpoint.
-        // Let's use startChatSession to "get" the session by phone.
-        const current = await api.startChatSession(userId, phone, name);
-        if (current) setSession(current);
-      }, 3000);
-    }
-    return () => clearInterval(interval);
-  }, [step, session?.id, userId, phone, name]);
+    if (!isOpen || step !== 'CHAT') return;
 
-  const validateLogin = (): boolean => {
-    const newErrors: ValidationErrors = {};
+    // Initialize WebSocket
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const socket = new WebSocket(`${protocol}//${window.location.hostname}:8080/ws?role=user&sessionId=${sessionId}`);
+    socketRef.current = socket;
 
-    // Name validation
-    if (!name.trim()) newErrors.name = "Name is required.";
+    socket.onopen = () => {
+      console.log('✅ User WS Connected');
+      fetchSession();
+    };
 
-    // Sri Lankan NIC Validation
-    // 9 digits + V/X OR 12 digits
-    const nicRegex = /^([0-9]{9}[vVxX]|[0-9]{12})$/;
-    if (!nicRegex.test(userId.trim())) {
-      newErrors.userId = "Invalid NIC format (9 digits + V/X or 12 digits).";
-    }
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === 'chat') {
+        const msg = data.payload;
+        if (data.sessionId === sessionId) {
+          setSession(prev => {
+            if (!prev) return null;
+            const exists = prev.messages.some(m => m.id === msg.id);
+            if (exists) {
+              // Update status if it changed
+              return { ...prev, messages: prev.messages.map(m2 => m2.id === msg.id ? { ...m2, status: msg.status } : m2) };
+            }
+            return { ...prev, messages: [...prev.messages, msg] };
+          });
+        }
+      } else if (data.type === 'seen') {
+        if (data.sessionId === sessionId) {
+          setSession(prev => {
+            if (!prev) return null;
+            return {
+              ...prev,
+              messages: prev.messages.map(m => m.senderId === 'user' ? { ...m, status: 'SEEN' } : m)
+            };
+          });
+        }
+      }
+    };
 
-    // Phone validation (Sri Lankan)
-    const phoneRegex = /^(?:\+94|0)7[0-9]{8}$/;
-    if (!phoneRegex.test(phone.replace(/\s/g, ''))) {
-      newErrors.phone = "Invalid phone number format.";
-    }
+    return () => {
+      socket.close();
+    };
+  }, [isOpen, sessionId, step]);
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleLogin = async (e: React.FormEvent) => {
+  const startChat = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateLogin()) return;
-
-    setLoading(true);
-    const blocked = await mockApi.checkBlockedStatus(userId, phone);
-    if (blocked) {
-      setIsBlocked(true);
-      setLoading(false);
-      return;
-    }
-    const code = await mockApi.sendOtp(phone);
-    setCorrectOtp(code);
-    setStep('OTP');
-    setLoading(false);
-  };
-
-  const verifyOtp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (otp === correctOtp) {
-      // In a real app, we'd check for existing sessions on the backend
-      // Our StartChatSession already handles returning existing active sessions.
-      startNewChat();
-    } else {
-      alert("Invalid Security Code.");
-    }
-  };
-
-  const startNewChat = async () => {
-    const sess = await api.startChatSession(userId, phone, name);
-    setSession(sess);
+    if (!nickName.trim()) return;
+    localStorage.setItem('chars_chat_name', nickName);
     setStep('CHAT');
+    // WS will auto-connect due to step change
   };
 
-  const resumeChat = (sess: ChatSession) => {
+  const fetchSession = async () => {
+    const sess = await api.startChatSession(sessionId, "anonymous", nickName || "Anonymous User");
     setSession(sess);
-    setStep('CHAT');
   };
 
-  const handleSend = async (e?: React.FormEvent, customText?: string) => {
+  const handleSend = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    const textToSend = customText || input;
-    if (!textToSend.trim() || !session) return;
-    const msg = await api.sendMessage(session.sessionId, 'user', name, textToSend);
-    if (!customText) setInput('');
-    setSession(prev => prev ? { ...prev, messages: [...prev.messages, msg] } : null);
+    if (!input.trim() || !socketRef.current) return;
+
+    const chatMsg: ChatMessage = {
+      id: `MSG-${Date.now()}`,
+      senderId: 'user',
+      senderName: nickName || 'Anonymous',
+      text: input,
+      timestamp: new Date().toISOString(),
+      status: 'SENT'
+    };
+
+    console.log('📤 Sending message via WS:', chatMsg);
+    socketRef.current.send(JSON.stringify({
+      type: 'chat',
+      sessionId: sessionId,
+      payload: chatMsg
+    }));
+
+    setSession(prev => {
+      if (!prev) return null;
+      return { ...prev, messages: [...prev.messages, chatMsg] };
+    });
+    setInput('');
   };
 
   const resetChat = () => {
-    if (window.confirm("Start a completely new chat session?")) {
-      setStep('LOGIN');
-      setSession(null);
-      setUserId('');
-      setPhone('');
-      setName('');
-      setOtp('');
-      setErrors({});
+    if (window.confirm("Delete this session and start a new anonymous chat?")) {
+      localStorage.removeItem('chars_chat_session');
+      localStorage.removeItem('chars_chat_name');
+      window.location.reload();
     }
   };
 
@@ -183,127 +193,58 @@ export default function LiveChat({ externalOpen, setExternalOpen }: LiveChatProp
             <h4 className="text-lg font-black text-slate-900">Access Restricted</h4>
             <p className="text-xs text-slate-500 font-medium px-6">Your identity has been flagged by system administrators.</p>
           </div>
-        ) : step === 'LOGIN' ? (
-          <form onSubmit={handleLogin} className="space-y-4">
-            <p className="text-xs text-slate-500 font-bold mb-6">Verification required to connect with an officer.</p>
-
-            <div className="space-y-1">
-              <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Full Name</label>
-              <input
-                required
-                value={name}
-                onChange={e => {
-                  setName(e.target.value);
-                  if (errors.name) setErrors({ ...errors, name: undefined });
-                }}
-                className={`w-full px-4 py-3 bg-white border ${errors.name ? 'border-red-500 ring-2 ring-red-500/10' : 'border-slate-200'} rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-600 font-bold transition-all`}
-                placeholder="e.g. John Doe"
-              />
-              {errors.name && <p className="text-[9px] font-black text-red-500 uppercase ml-1 mt-1 tracking-widest">{errors.name}</p>}
+        ) : step === 'GREETING' ? (
+          <div className="h-full flex flex-col items-center justify-center text-center space-y-6 animate-fade-in">
+            <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl">
+              <i className="fas fa-child"></i>
             </div>
-
-            <div className="space-y-1">
-              <label className="text-[10px] font-black uppercase text-slate-400 ml-1">National ID Number (NIC)</label>
-              <input
-                required
-                value={userId}
-                onChange={e => {
-                  setUserId(e.target.value);
-                  if (errors.userId) setErrors({ ...errors, userId: undefined });
-                }}
-                className={`w-full px-4 py-3 bg-white border ${errors.userId ? 'border-red-500 ring-2 ring-red-500/10' : 'border-slate-200'} rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-600 font-mono transition-all uppercase`}
-                placeholder="e.g. 199512345678"
-              />
-              {errors.userId && <p className="text-[9px] font-black text-red-500 uppercase ml-1 mt-1 tracking-widest">{errors.userId}</p>}
-            </div>
-
-            <div className="space-y-1">
-              <label className="text-[10px] font-black uppercase text-slate-400 ml-1">Phone Number</label>
-              <input
-                required
-                value={phone}
-                onChange={e => {
-                  setPhone(e.target.value);
-                  if (errors.phone) setErrors({ ...errors, phone: undefined });
-                }}
-                className={`w-full px-4 py-3 bg-white border ${errors.phone ? 'border-red-500 ring-2 ring-red-500/10' : 'border-slate-200'} rounded-xl text-sm outline-none focus:ring-2 focus:ring-indigo-600 font-bold transition-all`}
-                placeholder="+94 XX XXX XXXX"
-              />
-              {errors.phone && <p className="text-[9px] font-black text-red-500 uppercase ml-1 mt-1 tracking-widest">{errors.phone}</p>}
-            </div>
-
-            <button disabled={loading} type="submit" className="w-full bg-indigo-600 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 mt-4">
-              {loading ? <i className="fas fa-spinner fa-spin"></i> : 'Send Security Code'}
-            </button>
-          </form>
-        ) : step === 'OTP' ? (
-          <form onSubmit={verifyOtp} className="space-y-6 py-8 text-center">
             <div className="space-y-2">
-              <h4 className="text-lg font-black text-slate-900">Verify Identity</h4>
-              <p className="text-xs text-slate-500 font-medium">We sent a 4-digit code to {phone}</p>
-              <div className="bg-amber-50 border border-amber-200 p-2 rounded-lg text-[10px] font-black text-amber-700 uppercase tracking-widest mt-4">
-                [DEMO] CODE: {correctOtp}
-              </div>
+              <h4 className="text-lg font-black text-slate-900">Protecting Our Future</h4>
+              <p className="text-xs text-slate-500 font-medium px-4">
+                Pin sidda wenawa machan meyata sambanda unata. Api okkoma ekathu wela innocent childrenwa save karagamu.
+              </p>
             </div>
-            <input autoFocus required maxLength={4} value={otp} onChange={e => setOtp(e.target.value)} className="w-32 text-center text-3xl font-black tracking-[0.5em] py-4 bg-white border-2 border-slate-200 rounded-2xl outline-none focus:border-indigo-600" placeholder="0000" />
-            <button type="submit" className="w-full bg-slate-900 text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest">Connect</button>
-          </form>
-        ) : step === 'CHOICE' ? (
-          <div className="space-y-6 py-4 animate-fade-in">
-            <div className="flex flex-col items-start gap-3">
-              <div className="max-w-[85%] px-4 py-3 bg-slate-200 text-slate-600 rounded-2xl rounded-tl-none text-xs font-medium shadow-sm border border-slate-300">
-                Hello {name}, how can I help you? Don't be afraid, we protect your privacy.
-              </div>
-              <div className="max-w-[85%] px-4 py-3 bg-slate-200 text-slate-600 rounded-2xl rounded-tl-none text-xs font-medium shadow-sm border border-slate-300">
-                I found your previous conversation. Shall I connect you with your previous details or start a new chat?
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-4 mt-8">
-              <button
-                onClick={() => resumeChat(existingSessions[0])}
-                className="w-full p-5 bg-white border-2 border-indigo-600 rounded-2xl text-left hover:bg-indigo-50 transition-all shadow-lg group"
-              >
-                <div className="flex justify-between items-center">
-                  <span className="font-black text-indigo-600 uppercase text-[10px] tracking-widest">Connect Previous</span>
-                  <i className="fas fa-chevron-right text-indigo-600 group-hover:translate-x-1 transition-transform"></i>
-                </div>
-                <p className="text-[9px] text-slate-400 mt-1 font-bold uppercase">Case ID: {existingSessions[0].id.split('-')[1]}</p>
+            <form onSubmit={startChat} className="w-full space-y-3 px-4">
+              <input
+                autoFocus
+                required
+                value={nickName}
+                onChange={e => setNickName(e.target.value)}
+                placeholder="Oyata kiyanna ona nama mokakda?"
+                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-600 outline-none font-bold"
+              />
+              <button type="submit" className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-sm shadow-lg hover:bg-indigo-700 transition-all">
+                Chat eka Start karamu
               </button>
-
-              <button
-                onClick={startNewChat}
-                className="w-full p-5 bg-slate-100 border-2 border-transparent rounded-2xl text-left hover:bg-slate-200 transition-all"
-              >
-                <span className="font-black text-slate-900 uppercase text-[10px] tracking-widest">Start New Inquiry</span>
-                <p className="text-[9px] text-slate-400 mt-1 font-bold uppercase tracking-widest">Create fresh session</p>
-              </button>
-            </div>
+            </form>
           </div>
         ) : (
           <div ref={scrollRef} className="h-[350px] space-y-4 overflow-y-auto pr-2 custom-scrollbar pb-8">
             {session?.messages.map((m, i) => (
               <div key={i} className={`flex flex-col ${m.senderId === 'user' ? 'items-end' : 'items-start'}`}>
-                <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-xs font-medium shadow-sm ${m.senderId === 'user' ? 'bg-indigo-600 text-white rounded-tr-none' : m.senderId === 'bot' ? 'bg-slate-200 text-slate-600 rounded-tl-none border border-slate-300' : 'bg-white text-slate-800 border border-slate-100 rounded-tl-none ring-1 ring-slate-100 ring-offset-2'}`}>
+                <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-xs font-medium shadow-sm transition-all relative ${m.senderId === 'user' ? 'bg-indigo-600 text-white rounded-tr-none' : m.senderId === 'bot' ? 'bg-slate-200 text-slate-600 rounded-tl-none border border-slate-300' : 'bg-white text-slate-800 border border-slate-100 rounded-tl-none ring-1 ring-slate-100 ring-offset-2'}`}>
                   {m.text}
                   {m.isEdited && <span className="block text-[8px] opacity-60 mt-1 italic text-right">(edited)</span>}
+
+                  {/* Message Ticks */}
+
                 </div>
-                <span className="text-[8px] font-black text-slate-400 uppercase mt-1 px-1">
-                  {m.senderId === 'user' ? 'You' : m.senderId === 'bot' ? 'System Bot' : 'Officer'} • {new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                <span className="text-[8px] font-black text-slate-400 uppercase mt-1 px-1 flex items-center gap-1">
+                  {m.senderId === 'user' ? 'You' : m.senderId === 'bot' ? 'SafeGuard Bot' : 'Officer'} • {new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  {m.senderId === 'user' && (
+                    <span className="ml-1 flex items-center">
+                      {m.status === 'SENT' ? (
+                        <i className="fas fa-check text-[7px]"></i>
+                      ) : m.status === 'DELIVERED' ? (
+                        <i className="fas fa-check-double text-[7px]"></i>
+                      ) : m.status === 'SEEN' ? (
+                        <i className="fas fa-check-double text-[7px] text-blue-500"></i>
+                      ) : null}
+                    </span>
+                  )}
                 </span>
               </div>
             ))}
-
-            {session?.messages.length === 3 && session.messages[2].text.includes("connect you with an authorized duty officer") && (
-              <div className="flex flex-col gap-2 mt-4 animate-fade-in items-start">
-                <button
-                  onClick={() => handleSend(undefined, "Yes, please connect me with the admin/officer.")}
-                  className="bg-white border-2 border-indigo-600 text-indigo-600 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-sm"
-                >
-                  <i className="fas fa-shield-halved mr-2"></i> Connect with Admin
-                </button>
-              </div>
-            )}
           </div>
         )}
       </div>

@@ -13,6 +13,7 @@ type ChatMessage struct {
 	SenderName string    `bson:"senderName" json:"senderName"`
 	Text       string    `bson:"text" json:"text"`
 	Timestamp  time.Time `bson:"timestamp" json:"timestamp"`
+	Status     string    `bson:"status" json:"status"` // SENT, DELIVERED, SEEN
 	IsEdited   bool      `bson:"isEdited,omitempty" json:"isEdited,omitempty"`
 }
 
@@ -26,6 +27,8 @@ type ChatSession struct {
 	Messages    []ChatMessage      `bson:"messages" json:"messages"`
 	Status      string             `bson:"status" json:"status"`
 	UnreadCount int                `bson:"unreadCount" json:"unreadCount"`
+	IP          string             `bson:"ip" json:"ip"`
+	AdminID     string             `bson:"adminId,omitempty" json:"adminId,omitempty"`
 	CreatedAt   time.Time          `bson:"createdAt" json:"createdAt"`
 	UpdatedAt   time.Time          `bson:"updatedAt" json:"updatedAt"`
 }
