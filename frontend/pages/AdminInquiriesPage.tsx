@@ -69,14 +69,15 @@ export default function AdminInquiriesPage({ user }: { user: Admin | null }) {
                             <div className="flex flex-col md:flex-row justify-between gap-4 mb-4">
                                 <div className="flex items-center gap-3">
                                     <div className={`w-10 h-10 rounded-full flex items-center justify-center ${inquiry.is_voice ? 'bg-purple-100 text-purple-600' : 'bg-slate-100 text-slate-600'}`}>
-                                        <i className={`fas ${inquiry.is_voice ? 'fa-microphone-lines' : 'fa-keyboard'}`}></i>
+                                        <i className={`fas ${inquiry.is_voice ? 'fa-microphone-lines' : 'fa-envelope-open-text'}`}></i>
                                     </div>
                                     <div>
-                                        <span className="block text-xs font-bold uppercase tracking-wider text-slate-400">
+                                        <div className="flex items-center gap-2">
+                                            {inquiry.name && <span className="text-sm font-bold text-slate-700 dark:text-white">{inquiry.name}</span>}
+                                            {inquiry.department && <span className="text-[10px] uppercase font-bold bg-blue-50 text-blue-600 px-2 rounded-full border border-blue-100">{inquiry.department}</span>}
+                                        </div>
+                                        <span className="block text-xs font-bold uppercase tracking-wider text-slate-400 mt-0.5">
                                             {new Date(inquiry.created_at).toLocaleString()}
-                                        </span>
-                                        <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${inquiry.is_voice ? 'bg-purple-500/10 text-purple-500' : 'bg-slate-500/10 text-slate-500'}`}>
-                                            {inquiry.is_voice ? 'Voice Report' : 'Text Inquiry'}
                                         </span>
                                     </div>
                                 </div>
@@ -84,7 +85,7 @@ export default function AdminInquiriesPage({ user }: { user: Admin | null }) {
                                 <div className="flex gap-2">
                                     {inquiry.is_voice && (
                                         <button
-                                            onClick={() => toggleAudio(inquiry.audio_url)}
+                                            onClick={() => toggleAudio(inquiry.audio_url || '')}
                                             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-colors"
                                         >
                                             <i className="fas fa-play"></i> Play Audio
@@ -100,8 +101,17 @@ export default function AdminInquiriesPage({ user }: { user: Admin | null }) {
                                 </div>
                             </div>
 
-                            <div className={`p-4 rounded-lg font-mono text-sm leading-relaxed whitespace-pre-wrap ${theme === 'dark' ? 'bg-slate-900 text-slate-300' : 'bg-slate-50 text-slate-700'}`}>
-                                {inquiry.transcription || "No transcription available."}
+                            <div className="space-y-4">
+                                <div className={`p-4 rounded-lg font-mono text-sm leading-relaxed whitespace-pre-wrap ${theme === 'dark' ? 'bg-slate-900 text-slate-300' : 'bg-slate-50 text-slate-700'}`}>
+                                    {inquiry.transcription || inquiry.message || "No content available."}
+                                </div>
+
+                                {!inquiry.is_voice && inquiry.email && (
+                                    <div className="flex items-center gap-2 text-xs font-bold text-slate-400">
+                                        <i className="fas fa-reply"></i>
+                                        <span>Reply to: <a href={`mailto:${inquiry.email}`} className="text-blue-500 hover:underline">{inquiry.email}</a></span>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))}

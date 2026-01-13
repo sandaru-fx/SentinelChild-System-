@@ -87,8 +87,13 @@ export interface BlockedUser {
 
 export interface Inquiry {
   id: string;
-  transcription: string;
-  audio_url: string;
+  type: 'voice' | 'general';
+  name?: string;
+  email?: string;
+  department?: string;
+  message?: string;
+  transcription?: string;
+  audio_url?: string;
   is_voice: boolean;
   created_at: string;
   status: string;

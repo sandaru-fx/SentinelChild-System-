@@ -75,15 +75,18 @@ export const api = {
     }
   },
 
-  sendInquiry: async (data: { category: string; email?: string; location?: string; message: string }): Promise<{ success: boolean }> => {
+  sendInquiry: async (data: { name: string; email: string; department: string; message: string }): Promise<{ success: boolean; inquiry?: any }> => {
     if (isDemo()) return mockApi.sendInquiry(data);
     try {
-      const response = await fetch(`${N8N_BASE_URL}/contact-inquiry`, {
+      const response = await fetch(`${N8N_BASE_URL}/inquiries`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
       });
-      return await response.json();
+      if (response.ok) {
+        return { success: true, inquiry: await response.json() };
+      }
+      return { success: false };
     } catch (error) {
       return mockApi.sendInquiry(data);
     }
@@ -222,6 +225,9 @@ export const api = {
       const response = await fetch(`${N8N_BASE_URL}/admin/inquiries`, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
       return await response.json();
     } catch (error) {
       console.error('API getInquiries Error:', error);

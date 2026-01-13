@@ -160,7 +160,7 @@ export default function VoiceAssistant() {
     <div className="fixed bottom-8 right-8 z-[100] flex flex-col items-end gap-4">
       {/* Assistant Window */}
       {isOpen && (
-        <div className="w-80 sm:w-96 bg-white rounded-3xl shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[600px] animate-fade-in animate-slide-up font-sans">
+        <div className="w-80 sm:w-96 bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col max-h-[600px] animate-fade-in animate-slide-up font-sans transition-colors">
           <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-700 text-white flex justify-between items-center">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center animate-pulse">
@@ -174,18 +174,18 @@ export default function VoiceAssistant() {
           </div>
 
           {showSuccess ? (
-            <div className="flex-grow p-8 flex flex-col items-center justify-center text-center space-y-4 bg-slate-50 min-h-[300px]">
-              <div className="w-20 h-20 bg-green-100 text-green-500 rounded-full flex items-center justify-center text-4xl mb-2 animate-bounce">
+            <div className="flex-grow p-8 flex flex-col items-center justify-center text-center space-y-4 bg-slate-50 dark:bg-slate-950/50 min-h-[300px]">
+              <div className="w-20 h-20 bg-green-100 dark:bg-green-900/20 text-green-500 dark:text-green-400 rounded-full flex items-center justify-center text-4xl mb-2 animate-bounce">
                 <i className="fas fa-check"></i>
               </div>
-              <h3 className="text-xl font-bold text-slate-800">Report Submitted</h3>
-              <p className="text-sm text-slate-500 max-w-[200px]">
-                Your voice inquiry has been securely received. Reference ID: <span className="font-mono bg-slate-200 px-1 rounded">#{Math.floor(Math.random() * 90000) + 10000}</span>
+              <h3 className="text-xl font-bold text-slate-800 dark:text-white">Report Submitted</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 max-w-[200px]">
+                Your voice inquiry has been securely received. Reference ID: <span className="font-mono bg-slate-200 dark:bg-slate-800 px-1 rounded">#{Math.floor(Math.random() * 90000) + 10000}</span>
               </p>
               <div className="pt-4 w-full">
                 <button
                   onClick={() => { setShowSuccess(false); setIsOpen(false); }}
-                  className="w-full bg-slate-900 text-white py-3 rounded-xl font-bold text-sm hover:bg-slate-800"
+                  className="w-full bg-slate-900 dark:bg-blue-600 text-white py-3 rounded-xl font-bold text-sm hover:bg-slate-800 dark:hover:bg-blue-700 transition-colors"
                 >
                   Close
                 </button>
@@ -193,9 +193,9 @@ export default function VoiceAssistant() {
             </div>
           ) : (
             <>
-              <div ref={scrollRef} className="flex-grow p-4 overflow-y-auto space-y-4 bg-slate-50 min-h-[300px]">
+              <div ref={scrollRef} className="flex-grow p-4 overflow-y-auto space-y-4 bg-slate-50 dark:bg-slate-950/50 min-h-[300px]">
                 {transcriptions.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center text-slate-400 text-center space-y-3">
+                  <div className="h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-600 text-center space-y-3">
                     <i className={`fas fa-wave-square text-2xl ${isActive ? 'animate-pulse text-red-500' : ''}`}></i>
                     <p className="text-xs px-8">
                       {isActive
@@ -203,7 +203,7 @@ export default function VoiceAssistant() {
                         : "Recording paused. Click 'Submit' to send your report."}
                     </p>
                     {isActive && (
-                      <div className="text-2xl font-mono font-bold text-slate-800 mt-2">
+                      <div className="text-2xl font-mono font-bold text-slate-800 dark:text-slate-200 mt-2">
                         {formatTime(recordingTime)}
                       </div>
                     )}
@@ -212,7 +212,7 @@ export default function VoiceAssistant() {
                 ) : (
                   transcriptions.map((t, i) => (
                     <div key={i} className={`flex ${t.isUser ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[80%] px-4 py-2 rounded-2xl text-xs font-medium ${t.isUser ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white text-slate-800 shadow-sm border border-slate-200 rounded-tl-none'}`}>
+                      <div className={`max-w-[80%] px-4 py-2 rounded-2xl text-xs font-medium ${t.isUser ? 'bg-blue-600 text-white rounded-tr-none' : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 shadow-sm border border-slate-200 dark:border-slate-700 rounded-tl-none'}`}>
                         {t.text}
                       </div>
                     </div>
@@ -220,8 +220,8 @@ export default function VoiceAssistant() {
                 )}
               </div>
 
-              <div className="p-4 bg-white border-t border-slate-100 flex flex-col gap-3">
-                <div className="flex items-center justify-center gap-3 text-slate-400">
+              <div className="p-4 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-3">
+                <div className="flex items-center justify-center gap-3 text-slate-400 dark:text-slate-500">
                   {isActive ? (
                     <div className="flex items-center gap-2">
                       <div className="flex gap-1">
@@ -242,7 +242,7 @@ export default function VoiceAssistant() {
                 {isActive ? (
                   <button
                     onClick={stopAssistant}
-                    className="w-full bg-red-50 text-red-600 border border-red-200 py-3 rounded-xl font-bold text-sm hover:bg-red-100 flex items-center justify-center gap-2 transition-all"
+                    className="w-full bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-900/50 py-3 rounded-xl font-bold text-sm hover:bg-red-100 dark:hover:bg-red-900/30 flex items-center justify-center gap-2 transition-all"
                   >
                     <i className="fas fa-stop-circle"></i> Stop Recording
                   </button>
@@ -250,7 +250,7 @@ export default function VoiceAssistant() {
                   <button
                     onClick={handleSubmitInquiry}
                     disabled={isSubmitting || (!hasAudio && transcriptions.length === 0)}
-                    className="w-full bg-slate-900 text-white py-3 rounded-xl font-bold text-sm hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all"
+                    className="w-full bg-slate-900 dark:bg-blue-600 text-white py-3 rounded-xl font-bold text-sm hover:bg-slate-800 dark:hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all"
                   >
                     {isSubmitting ? (
                       <><i className="fas fa-spinner fa-spin"></i> Sending...</>

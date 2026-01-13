@@ -30,6 +30,7 @@ export default function ContactPage() {
   const [formEmail, setFormEmail] = useState('');
   const [formName, setFormName] = useState('');
   const [formMessage, setFormMessage] = useState('');
+  const [formDepartment, setFormDepartment] = useState('General Information');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
@@ -38,14 +39,29 @@ export default function ContactPage() {
     if (!formMessage) return;
 
     setIsSubmitting(true);
-    // Mock API call simulation for General Inquiry
-    setTimeout(() => {
-      setIsSuccess(true);
+
+    try {
+      const result = await api.sendInquiry({
+        name: formName,
+        email: formEmail,
+        department: formDepartment,
+        message: formMessage
+      });
+
+      if (result.success) {
+        setIsSuccess(true);
+        setFormEmail('');
+        setFormName('');
+        setFormMessage('');
+      } else {
+        alert("Failed to send inquiry. Please try again.");
+      }
+    } catch (error) {
+      console.error("Submission failed", error);
+      alert("An error occurred. Please try again.");
+    } finally {
       setIsSubmitting(false);
-      setFormEmail('');
-      setFormName('');
-      setFormMessage('');
-    }, 1500);
+    }
   };
 
   return (
@@ -182,7 +198,11 @@ export default function ContactPage() {
 
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-slate-400 pl-2">Select Department</label>
-                  <select className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-900 transition-all text-sm font-bold text-slate-900 dark:text-white outline-none appearance-none">
+                  <select
+                    value={formDepartment}
+                    onChange={(e) => setFormDepartment(e.target.value)}
+                    className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-900 transition-all text-sm font-bold text-slate-900 dark:text-white outline-none appearance-none"
+                  >
                     <option>General Information</option>
                     <option>Technical Support</option>
                     <option>Media & Press</option>
