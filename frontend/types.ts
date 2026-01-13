@@ -84,3 +84,12 @@ export interface BlockedUser {
   reason: string;
   blockedAt: string;
 }
+
+export interface Inquiry {
+  id: string;
+  transcription: string;
+  audio_url: string;
+  is_voice: boolean;
+  created_at: string;
+  status: string;
+}

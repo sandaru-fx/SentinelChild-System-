@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -14,6 +15,14 @@ func Connect(ctx context.Context, uri string) (*mongo.Client, error) {
 	defer cancel()
 
 	clientOpts := options.Client().ApplyURI(uri)
+
+	// Mask password for safe logging
+	maskedURI := uri
+	if len(uri) > 20 {
+		maskedURI = uri[:15] + "..." + uri[len(uri)-10:]
+	}
+	log.Printf("[DATABASE] Attempting connection to: %s", maskedURI)
+
 	client, err := mongo.Connect(ctx, clientOpts)
 	if err != nil {
 		return nil, err

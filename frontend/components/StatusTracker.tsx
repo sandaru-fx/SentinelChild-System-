@@ -61,25 +61,25 @@ export default function StatusTracker() {
   return (
     <div className="max-w-2xl mx-auto my-20 px-4">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-black text-slate-900 mb-4">{t('trackProgress')}</h1>
+        <h1 className="text-4xl font-black text-slate-900 dark:text-white mb-4 transition-colors">{t('trackProgress')}</h1>
       </div>
 
-      <div className="bg-white p-10 rounded-[2.5rem] shadow-2xl border border-slate-100">
+      <div className="bg-white dark:bg-slate-900/40 p-10 rounded-[2.5rem] shadow-2xl border border-slate-100 dark:border-slate-800 backdrop-blur-md transition-colors">
         <form onSubmit={handleSearch} className="flex flex-col gap-4 mb-10">
           <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">{t('enterId')}</label>
           <div className="flex flex-col sm:flex-row gap-3">
-            <input 
-              type="text" 
+            <input
+              type="text"
               required
               placeholder="CH-XXXXXX"
               value={reportId}
               onChange={e => setReportId(e.target.value)}
-              className="flex-grow px-6 py-5 bg-slate-50 border-2 border-slate-200 rounded-2xl focus:border-blue-600 outline-none font-mono text-2xl uppercase tracking-widest"
+              className="flex-grow px-6 py-5 bg-slate-50 dark:bg-slate-950/50 border-2 border-slate-200 dark:border-slate-800 rounded-2xl focus:border-blue-600 outline-none font-mono text-2xl uppercase tracking-widest text-slate-900 dark:text-white transition-all"
             />
-            <button 
+            <button
               type="submit"
               disabled={loading}
-              className="bg-slate-900 text-white px-8 py-5 rounded-2xl font-black hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
+              className="bg-slate-900 dark:bg-blue-600 text-white px-8 py-5 rounded-2xl font-black hover:bg-slate-800 dark:hover:bg-blue-700 transition-all flex items-center justify-center gap-2 shadow-lg"
             >
               {loading ? <i className="fas fa-circle-notch fa-spin"></i> : t('searchBtn')}
             </button>
@@ -95,15 +95,15 @@ export default function StatusTracker() {
         {report && (
           <div className="space-y-8 animate-fade-in">
             <StatusCard status={report.status} />
-            <div className="bg-slate-50 p-8 rounded-2xl border border-slate-200">
-              <div className="flex items-center gap-3 mb-4 text-slate-900 font-bold">
-                <i className="fas fa-message text-blue-600"></i>
+            <div className="bg-slate-50 dark:bg-slate-950/40 p-8 rounded-2xl border border-slate-200 dark:border-slate-800 transition-colors">
+              <div className="flex items-center gap-3 mb-4 text-slate-900 dark:text-white font-bold">
+                <i className="fas fa-message text-blue-600 dark:text-blue-400"></i>
                 {t('investigationNotes')}
               </div>
-              <p className="text-slate-600 text-sm leading-relaxed italic">
+              <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed italic">
                 {report.adminNotes || "Case under review. Please check back later for official updates."}
               </p>
-              <div className="mt-4 pt-4 border-t border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                 Last Updated: {new Date(report.updatedAt).toLocaleDateString()}
               </div>
             </div>

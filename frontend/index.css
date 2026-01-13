@@ -3,28 +3,29 @@
 @theme {
   --font-sans: 'Inter', sans-serif;
 
-  --animate-fade-in: fadeIn 0.5s ease-out;
-  --animate-slide-up: slideUp 0.5s ease-out;
+  --animate-ping: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite;
+  --animate-bounce: bounce 1s infinite;
 
-  @keyframes fadeIn {
-    0% {
-      opacity: 0;
-    }
+  @keyframes ping {
 
+    75%,
     100% {
-      opacity: 1;
+      transform: scale(2);
+      opacity: 0;
     }
   }
 
-  @keyframes slideUp {
-    0% {
-      transform: translateY(20px);
-      opacity: 0;
+  @keyframes bounce {
+
+    0%,
+    100% {
+      transform: translateY(-25%);
+      animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
     }
 
-    100% {
+    50% {
       transform: translateY(0);
-      opacity: 1;
+      animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
     }
   }
 }
@@ -40,11 +41,8 @@
   --color-text-muted: #94a3b8;
 
   --color-primary: #3b82f6;
-  /* Blue 500 */
   --color-primary-dark: #2563eb;
-  /* Blue 600 */
   --color-primary-light: #eff6ff;
-  /* Blue 50 */
 
   --color-success: #10b981;
   --color-danger: #ef4444;
@@ -54,22 +52,16 @@
 .dark {
   /* Dark Mode */
   --color-bg: #0f172a;
-  /* Slate 900 */
   --color-surface: #1e293b;
-  /* Slate 800 */
   --color-border: #334155;
-  /* Slate 700 */
 
   --color-text-primary: #f8fafc;
   --color-text-secondary: #cbd5e1;
   --color-text-muted: #64748b;
 
   --color-primary: #60a5fa;
-  /* Blue 400 */
   --color-primary-dark: #3b82f6;
-  /* Blue 500 */
   --color-primary-light: #1e3a8a;
-  /* Blue 900 */
 }
 
 /* Base Styles */
@@ -80,8 +72,11 @@ body {
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Custom Utilities via standard CSS classes if needed, 
-   but ideally we use Tailwind's arbitrary values or config */
+::selection {
+  background-color: rgba(59, 130, 246, 0.3);
+  /* Blue 500 with opacity */
+  color: white;
+}
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {

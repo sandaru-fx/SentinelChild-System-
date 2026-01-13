@@ -17,7 +17,7 @@ import (
 )
 
 func main() {
-	// Load .env file if it exists
+	// Load .env file
 	_ = godotenv.Load()
 
 	uri := os.Getenv("MONGODB_URI")
@@ -48,6 +48,12 @@ func main() {
 	r.HandleFunc("/chat/start", controllers.StartChatSession(client)).Methods(http.MethodPost)
 	r.HandleFunc("/chat/{id}/message", controllers.SendMessage(client)).Methods(http.MethodPost)
 
+	// Voice/Text Inquiries (Public)
+	r.HandleFunc("/inquiries", controllers.CreateInquiry(client)).Methods(http.MethodPost)
+
+	// Serve Static Files (Audio Uploads)
+	r.PathPrefix("/uploads/").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads/"))))
+
 	// Admin Subrouter (Protected)
 	admin := r.PathPrefix("/admin").Subrouter()
 	admin.Use(middleware.AuthMiddleware)
@@ -60,6 +66,10 @@ func main() {
 	// Admin Chat Endpoints
 	admin.HandleFunc("/chat/sessions", controllers.ListChatSessions(client)).Methods(http.MethodGet)
 	admin.HandleFunc("/chat/{id}/read", controllers.MarkChatRead(client)).Methods(http.MethodPatch)
+
+	// Admin Inquiry Management
+	admin.HandleFunc("/inquiries", controllers.GetInquiries(client)).Methods(http.MethodGet)
+	admin.HandleFunc("/inquiries/{id}", controllers.DeleteInquiry(client)).Methods(http.MethodDelete)
 
 	// Admin Personnel Management
 	admin.HandleFunc("/personnel", controllers.ListAdmins(client)).Methods(http.MethodGet)

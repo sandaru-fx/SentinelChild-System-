@@ -49,7 +49,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 relative overflow-hidden font-sans">
+    <div className="flex-grow bg-slate-50 dark:bg-slate-950 relative overflow-hidden font-sans transition-colors duration-300">
 
       {/* 3D Background Layer */}
       <div className="absolute top-0 right-0 w-full h-full md:w-1/2 opacity-20 pointer-events-none z-0">
@@ -65,9 +65,9 @@ export default function ContactPage() {
 
         {/* Header */}
         <div className="mb-16 text-center md:text-left">
-          <span className="text-blue-600 font-black uppercase text-[10px] tracking-[0.3em]">Official Channels</span>
-          <h1 className="text-4xl md:text-5xl font-black text-slate-900 mt-4 mb-2">Contact & <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">Support</span></h1>
-          <p className="text-slate-500 max-w-xl font-medium">
+          <span className="text-blue-600 dark:text-blue-400 font-black uppercase text-[10px] tracking-[0.3em]">Official Channels</span>
+          <h1 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white mt-4 mb-2">Contact & <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500 dark:from-blue-400 dark:to-cyan-300">Support</span></h1>
+          <p className="text-slate-600 dark:text-slate-400 max-w-xl font-medium">
             Reach out to the National Child Protection Authority or Sri Lanka Police for inquiries. For emergencies, please call the hotlines directly.
           </p>
         </div>
@@ -78,19 +78,19 @@ export default function ContactPage() {
           <div className="space-y-8">
 
             {/* Emergency Card */}
-            <div className="bg-white p-8 rounded-3xl border border-red-100 shadow-xl shadow-red-500/5 relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300">
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+            <div className="bg-white dark:bg-slate-900/40 p-8 rounded-3xl border border-red-100 dark:border-red-900/30 shadow-xl shadow-red-500/5 relative overflow-hidden group hover:scale-[1.02] transition-all duration-300">
+              <div className="absolute top-0 right-0 p-4 opacity-10 dark:opacity-5 group-hover:opacity-20 transition-opacity">
                 <i className="fas fa-siren-on text-9xl text-red-600"></i>
               </div>
               <div className="relative">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center text-red-600">
+                  <div className="w-10 h-10 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center text-red-600 dark:text-red-400">
                     <i className="fas fa-phone-rotary animate-pulse"></i>
                   </div>
-                  <span className="text-red-500 font-black uppercase text-[10px] tracking-widest">Emergency Hotline</span>
+                  <span className="text-red-500 dark:text-red-400 font-black uppercase text-[10px] tracking-widest">Emergency Hotline</span>
                 </div>
-                <h2 className="text-5xl font-black text-slate-900 mb-2">119</h2>
-                <p className="text-slate-500 font-bold mb-6">Sri Lanka Police Emergency Unit</p>
+                <h2 className="text-5xl font-black text-slate-900 dark:text-white mb-2">119</h2>
+                <p className="text-slate-600 dark:text-slate-400 font-bold mb-6">Sri Lanka Police Emergency Unit</p>
                 <a href="tel:119" className="inline-flex items-center justify-center w-full py-4 bg-red-600 text-white font-bold uppercase tracking-widest rounded-xl hover:bg-red-700 transition-colors shadow-lg shadow-red-600/20">
                   Call Now
                 </a>
@@ -98,19 +98,19 @@ export default function ContactPage() {
             </div>
 
             {/* NCPA Card */}
-            <div className="bg-white p-8 rounded-3xl border border-blue-100 shadow-xl shadow-blue-500/5 relative overflow-hidden group hover:scale-[1.02] transition-transform duration-300">
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+            <div className="bg-white dark:bg-slate-900/40 p-8 rounded-3xl border border-blue-100 dark:border-blue-900/30 shadow-xl shadow-blue-500/5 relative overflow-hidden group hover:scale-[1.02] transition-all duration-300">
+              <div className="absolute top-0 right-0 p-4 opacity-10 dark:opacity-5 group-hover:opacity-20 transition-opacity">
                 <i className="fas fa-shield-check text-9xl text-blue-600"></i>
               </div>
               <div className="relative">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+                  <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400">
                     <i className="fas fa-child-reaching"></i>
                   </div>
-                  <span className="text-blue-500 font-black uppercase text-[10px] tracking-widest">Child Protection</span>
+                  <span className="text-blue-500 dark:text-blue-400 font-black uppercase text-[10px] tracking-widest">Child Protection</span>
                 </div>
-                <h2 className="text-5xl font-black text-slate-900 mb-2">1929</h2>
-                <p className="text-slate-500 font-bold mb-6">National Child Protection Authority (NCPA)</p>
+                <h2 className="text-5xl font-black text-slate-900 dark:text-white mb-2">1929</h2>
+                <p className="text-slate-600 dark:text-slate-400 font-bold mb-6">National Child Protection Authority (NCPA)</p>
                 <a href="tel:1929" className="inline-flex items-center justify-center w-full py-4 bg-blue-600 text-white font-bold uppercase tracking-widest rounded-xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20">
                   Call ChildLine
                 </a>
@@ -140,9 +140,9 @@ export default function ContactPage() {
           </div>
 
           {/* Right Column: Inquiry Form */}
-          <div className="bg-white/80 backdrop-blur-md p-8 md:p-10 rounded-[3rem] border border-white shadow-2xl relative">
-            <h3 className="text-2xl font-black text-slate-900 mb-2">General Inquiries</h3>
-            <p className="text-slate-500 text-sm mb-8 font-medium">For non-emergency questions regarding policies, volunteering, or technical support.</p>
+          <div className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-md p-8 md:p-10 rounded-[3rem] border border-white dark:border-slate-800 shadow-2xl relative">
+            <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2">General Inquiries</h3>
+            <p className="text-slate-600 dark:text-slate-400 text-sm mb-8 font-medium">For non-emergency questions regarding policies, volunteering, or technical support.</p>
 
             {isSuccess ? (
               <div className="bg-emerald-50 border border-emerald-100 rounded-3xl p-8 text-center animate-fade-in">
@@ -163,7 +163,7 @@ export default function ContactPage() {
                       required
                       value={formName}
                       onChange={(e) => setFormName(e.target.value)}
-                      className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm font-bold text-slate-900 outline-none"
+                      className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-900 transition-all text-sm font-bold text-slate-900 dark:text-white outline-none"
                       placeholder="e.g. Ruwan Perera"
                     />
                   </div>
@@ -174,7 +174,7 @@ export default function ContactPage() {
                       required
                       value={formEmail}
                       onChange={(e) => setFormEmail(e.target.value)}
-                      className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm font-bold text-slate-900 outline-none"
+                      className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-900 transition-all text-sm font-bold text-slate-900 dark:text-white outline-none"
                       placeholder="name@example.com"
                     />
                   </div>
@@ -182,7 +182,7 @@ export default function ContactPage() {
 
                 <div className="space-y-2">
                   <label className="text-[10px] font-black uppercase text-slate-400 pl-2">Select Department</label>
-                  <select className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm font-bold text-slate-900 outline-none appearance-none">
+                  <select className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-900 transition-all text-sm font-bold text-slate-900 dark:text-white outline-none appearance-none">
                     <option>General Information</option>
                     <option>Technical Support</option>
                     <option>Media & Press</option>
@@ -197,7 +197,7 @@ export default function ContactPage() {
                     required
                     value={formMessage}
                     onChange={(e) => setFormMessage(e.target.value)}
-                    className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm font-bold text-slate-900 outline-none resize-none"
+                    className="w-full px-6 py-4 bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-800 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:bg-white dark:focus:bg-slate-900 transition-all text-sm font-bold text-slate-900 dark:text-white outline-none resize-none"
                     placeholder="How can we help you today?"
                   ></textarea>
                 </div>
@@ -205,7 +205,7 @@ export default function ContactPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-slate-800 transition-all flex items-center justify-center gap-3 shadow-xl"
+                  className="w-full bg-slate-900 dark:bg-blue-600 text-white py-5 rounded-2xl font-black uppercase tracking-widest text-xs hover:bg-slate-800 dark:hover:bg-blue-700 transition-all flex items-center justify-center gap-3 shadow-xl"
                 >
                   {isSubmitting ? 'Processing...' : (
                     <><span>Send Inquiry</span> <i className="fas fa-paper-plane"></i></>

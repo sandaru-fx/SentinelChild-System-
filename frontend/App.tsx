@@ -16,6 +16,7 @@ import AdminChatPage from './pages/AdminChatPage';
 import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
 import AdminTaskBoardPage from './pages/AdminTaskBoardPage'; // Import AdminTaskBoardPage
 import AdminUsersPage from './pages/AdminUsersPage'; // Import AdminUsersPage
+import AdminInquiriesPage from './pages/AdminInquiriesPage';
 import { Navbar } from './components/Navbar';
 
 import VoiceAssistant from './components/VoiceAssistant';
@@ -81,10 +82,10 @@ export default function App() {
   };
 
   return (
-    <LanguageProvider>
-      <ThemeProvider>
+    <ThemeProvider>
+      <LanguageProvider>
         <HashRouter>
-          <div className="min-h-screen flex flex-col font-sans selection:bg-blue-500 selection:text-white relative bg-[var(--color-bg)] transition-colors duration-200">
+          <div className="min-h-screen flex flex-col font-sans bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-200 transition-colors duration-300 selection:bg-blue-100 selection:text-blue-900 dark:selection:bg-blue-900 dark:selection:text-blue-100">
             <Background3D />
 
             <Routes>
@@ -104,13 +105,14 @@ export default function App() {
                 <Route path="analytics" element={<AdminAnalyticsPage />} />
                 <Route path="tasks" element={<AdminTaskBoardPage user={user} />} />
                 <Route path="users" element={<AdminUsersPage user={user} />} />
+                <Route path="inquiries" element={<AdminInquiriesPage user={user} />} />
                 <Route path="profile" element={<AdminProfilePage user={user} />} />
               </Route>
             </Routes>
 
           </div>
         </HashRouter>
-      </ThemeProvider>
-    </LanguageProvider>
+      </LanguageProvider>
+    </ThemeProvider>
   );
 }

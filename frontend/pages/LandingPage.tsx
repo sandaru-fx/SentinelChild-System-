@@ -1,185 +1,180 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { Suspense } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from '../context/LanguageContext';
-import heroBg from '../hero_bg.png';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls } from '@react-three/drei';
+import { motion } from 'framer-motion';
+import ProtectionShield from '../components/3d/ProtectionShield';
+import happyKids from '../assets/happy_kids.jpg'; // Ensure this matches exactly
 
-const FeatureCard = ({ icon, title, description, to, onClick, highlight = false }: {
-  icon: string;
-  title: string;
-  description: string;
-  to?: string;
-  onClick?: () => void;
-  highlight?: boolean;
-}) => {
-  const content = (
-    <div className={`h-full p-8 rounded-xl border transition-all duration-300 group relative text-left w-full
-      ${highlight
-        ? 'bg-blue-600 text-white border-blue-500 shadow-xl shadow-blue-900/20'
-        : 'bg-white text-slate-800 border-slate-200 hover:border-blue-300 hover:shadow-lg hover:-translate-y-1'
-      }`}>
-      <div className={`w-12 h-12 rounded-lg flex items-center justify-center mb-6 text-xl transition-transform duration-300 group-hover:scale-110
-         ${highlight ? 'bg-white/20 text-white' : 'bg-blue-50 text-blue-600'}`}>
-        <i className={`fas ${icon}`}></i>
-      </div>
-      <h3 className={`text-lg font-bold mb-3 ${highlight ? 'text-white' : 'text-slate-900'}`}>{title}</h3>
-      <p className={`text-sm leading-relaxed ${highlight ? 'text-blue-100' : 'text-slate-600'}`}>{description}</p>
-
-      {!highlight && (
-        <div className="mt-6 flex items-center gap-2 text-xs font-bold text-blue-600 uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">
-          Access Portal <i className="fas fa-arrow-right"></i>
-        </div>
-      )}
+const GlassCard = ({ icon, title, desc, delay }: { icon: string, title: string, desc: string, delay: number }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay, duration: 0.5 }}
+    className="backdrop-blur-xl bg-white/20 dark:bg-white/5 border border-slate-200 dark:border-white/10 p-6 rounded-2xl hover:bg-white/30 dark:hover:bg-white/10 transition-colors group cursor-default shadow-sm dark:shadow-none"
+  >
+    <div className="w-12 h-12 rounded-full bg-blue-500/10 dark:bg-blue-500/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+      <i className={`fas ${icon} text-blue-600 dark:text-blue-400 text-xl`}></i>
     </div>
-  );
-
-  if (to) return <Link to={to} className="block h-full">{content}</Link>;
-  return <button onClick={onClick} className="block h-full w-full">{content}</button>;
-};
+    <h3 className="text-slate-900 dark:text-white font-bold text-lg mb-2">{title}</h3>
+    <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">{desc}</p>
+  </motion.div>
+);
 
 export default function LandingPage() {
   const { t } = useTranslation();
 
-  const triggerVoiceAssistant = () => {
-    window.dispatchEvent(new CustomEvent('toggle-voice-assistant'));
-  };
-
   return (
-    <div className="bg-slate-50 min-h-screen font-sans">
+    <div className="flex-grow flex flex-col overflow-x-hidden selection:bg-blue-500/30">
 
-      {/* 1. Official Ribbon (30% Color - Navy/Dark) */}
-      <div className="bg-slate-900 text-slate-300 py-3 px-4 border-b border-slate-800">
-        <div className="max-w-7xl mx-auto flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
-          <div className="flex items-center gap-3">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/5/5f/Emblem_of_Sri_Lanka.svg" alt="Emblem" className="h-6 w-auto opacity-80" />
-            <span>Government of Sri Lanka Official Portal</span>
-          </div>
-          <div className="hidden md:flex items-center gap-4">
-            <span className="flex items-center gap-2"><i className="fas fa-lock text-emerald-500"></i> Secure Connection</span>
-            <span className="flex items-center gap-2"><i className="fas fa-clock text-blue-500"></i> 24/7 Monitoring</span>
-          </div>
-        </div>
-      </div>
+      {/* --- HERO SECTION --- */}
+      <section className="relative min-h-screen flex flex-col pt-20">
 
-      {/* 2. Hero Section with Trust Image */}
-      <section className="relative bg-slate-900 overflow-hidden min-h-[600px] flex items-center">
-        {/* Background Image with Overlay */}
+        {/* 1. Cinematic Background Layer */}
         <div className="absolute inset-0 z-0">
-          <img src={heroBg} alt="Child Protection" className="w-full h-full object-cover opacity-60" />
-          {/* Gradient Overlay for Text Readability */}
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-900 via-slate-900/90 to-blue-900/60"></div>
+          <img
+            src={happyKids}
+            alt="Futures we protect"
+            className="w-full h-full object-cover brightness-110 contrast-110 grayscale-[0.2]"
+          />
+          {/* Theme-aware Gradients */}
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-50 dark:from-slate-950 from-0% via-slate-50/90 dark:via-slate-950/80 via-30% to-transparent to-60%"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-50 dark:from-slate-950 via-transparent to-transparent"></div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 relative z-10 w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="text-left space-y-8">
-            <div className="inline-flex items-center gap-2 bg-blue-600/30 text-blue-200 border border-blue-500/50 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest backdrop-blur-sm">
-              <i className="fas fa-shield-halved"></i> National Child Protection Authority
+        {/* 2. 3D Experience Layer (Desktop Only) */}
+        <div className="absolute top-0 right-0 w-full lg:w-1/2 h-full z-10 pointer-events-none lg:pointer-events-auto hidden lg:block opacity-60">
+          <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
+            <Suspense fallback={null}>
+              <ProtectionShield />
+              <OrbitControls enableZoom={false} enablePan={false} autoRotate autoRotateSpeed={0.5} />
+            </Suspense>
+          </Canvas>
+        </div>
+
+        {/* 3. Content Layer */}
+        <div className="relative z-20 max-w-7xl mx-auto px-6 flex-1 flex flex-col justify-center w-full">
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="space-y-8 pt-10 lg:pt-0">
+
+              {/* Badge */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-blue-500/30 bg-blue-500/10 backdrop-blur-md"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-300">System Operational</span>
+              </motion.div>
+
+              {/* Headline */}
+              <motion.h1
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="text-5xl md:text-7xl font-black leading-tight tracking-tighter text-slate-900 dark:text-white"
+              >
+                The Future <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-cyan-600 to-emerald-600 dark:from-blue-400 dark:via-cyan-400 dark:to-emerald-400">
+                  Is Protected.
+                </span>
+              </motion.h1>
+
+              {/* Subheadline */}
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                className="text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-xl border-l-2 border-blue-500/50 pl-6"
+              >
+                The National Child Protection Authority's next-generation reporting system.
+                Safe. Anonymous. Immediate.
+              </motion.p>
+
+              {/* CTA Buttons */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="flex flex-col sm:flex-row gap-4"
+              >
+                <Link to="/report" className="relative group overflow-hidden bg-red-600 text-white px-8 py-4 rounded-xl font-bold uppercase tracking-wider text-sm shadow-lg shadow-red-600/20 hover:shadow-red-600/40 transition-all">
+                  <span className="relative z-10 flex items-center gap-3">
+                    Make a Report <i className="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                  </span>
+                  <div className="absolute inset-0 bg-red-700 transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left duration-300"></div>
+                </Link>
+
+                <button onClick={() => window.dispatchEvent(new CustomEvent('toggle-voice-assistant'))} className="px-8 py-4 rounded-xl font-bold uppercase tracking-wider text-sm border border-slate-200 dark:border-white/10 bg-white/50 dark:bg-white/5 hover:bg-white/80 dark:hover:bg-white/10 backdrop-blur-sm transition-all flex items-center gap-3 text-slate-900 dark:text-white">
+                  <i className="fas fa-microphone text-blue-600 dark:text-blue-400"></i> Voice Assist
+                </button>
+              </motion.div>
+
+              {/* Trust Indicators */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+                className="pt-8 flex items-center gap-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-500"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl"><i className="fas fa-shield-check"></i></span>
+                  <span className="text-xs font-bold uppercase leading-none">End-to-End<br />Encrypted</span>
+                </div>
+                <div className="h-8 w-px bg-white/20"></div>
+                <div className="flex items-center gap-2">
+                  <img src="https://upload.wikimedia.org/wikipedia/commons/5/5f/Emblem_of_Sri_Lanka.svg" className="h-8 w-auto" alt="Gov" />
+                  <span className="text-xs font-bold uppercase leading-none">Official<br />Gov. Portal</span>
+                </div>
+              </motion.div>
             </div>
 
-            <h1 className="text-5xl md:text-6xl font-black text-white leading-tight tracking-tight">
-              Protecting Children <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">Empowering Citizens</span>
-            </h1>
-
-            <p className="text-lg text-slate-300 max-w-xl leading-relaxed font-medium">
-              The Child Harassment & Abuse Reporting System (CHARS) provides a secure, anonymous bridge to justice. Every report is investigated.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 pt-4">
-              {/* Primary Action (10% Color - Red/Action) */}
-              <Link to="/report" className="bg-red-600 text-white px-8 py-4 rounded-lg font-bold text-sm uppercase tracking-wider hover:bg-red-700 transition-colors shadow-lg shadow-red-600/30 flex items-center justify-center gap-3">
-                <i className="fas fa-exclamation-circle"></i> Submit Report
-              </Link>
-
-              {/* Secondary Action (30% Color - Blue/Neutral) */}
-              <Link to="/status" className="bg-white/10 text-white border border-white/20 px-8 py-4 rounded-lg font-bold text-sm uppercase tracking-wider hover:bg-white/20 transition-all backdrop-blur-sm flex items-center justify-center gap-3">
-                <i className="fas fa-search"></i> Track Status
-              </Link>
-            </div>
+            {/* Right Side spacer for 3D element mobile visibility or just empty space */}
+            <div className="hidden lg:block"></div>
           </div>
+        </div>
 
-          {/* Hero Card/Stats - Optional "Trust" Element */}
-          <div className="hidden lg:block">
-            <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-8 max-w-md ml-auto">
-              <div className="flex items-center gap-4 mb-6">
-                <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center text-white text-xl">
-                  <i className="fas fa-check"></i>
-                </div>
-                <div>
-                  <h4 className="text-white font-bold">System Operational</h4>
-                  <p className="text-slate-400 text-xs">Duty Officers Online</p>
-                </div>
-              </div>
-              <div className="space-y-4">
-                <div className="bg-white/5 rounded-lg p-4">
-                  <div className="flex justify-between text-xs text-slate-300 mb-1">
-                    <span>Response Time</span>
-                    <span className="text-emerald-400 font-bold">&lt; 15 Mins</span>
-                  </div>
-                  <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full w-[85%] bg-emerald-500"></div>
-                  </div>
-                </div>
-                <div className="bg-white/5 rounded-lg p-4">
-                  <div className="flex justify-between text-xs text-slate-300 mb-1">
-                    <span>Action Rate</span>
-                    <span className="text-blue-400 font-bold">98.2%</span>
-                  </div>
-                  <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                    <div className="h-full w-[98%] bg-blue-500"></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce opacity-50">
+          <span className="text-[10px] uppercase tracking-widest">Scroll</span>
+          <i className="fas fa-chevron-down"></i>
         </div>
       </section>
 
-      {/* 3. Features Section (60% Color - White/Clean) */}
-      <section className="py-24 max-w-7xl mx-auto px-6">
-        <div className="text-center mb-16 space-y-4">
-          <h2 className="text-3xl font-black text-slate-900 tracking-tight">Core Safety Infrastructure</h2>
-          <p className="text-slate-500 max-w-2xl mx-auto">Built on military-grade encryption protocols to ensure reporter safety and data integrity.</p>
-          <div className="w-16 h-1 bg-blue-600 mx-auto rounded-full"></div>
-        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <FeatureCard
-            icon="fa-user-secret"
-            title="Anonymous Reporting"
-            description="Submit reports without revealing your identity. We use advanced metadata scrubbing to protect your digital footprint."
-            to="/report"
-          />
-          <FeatureCard
-            icon="fa-microphone-lines"
-            title="Voice Assistant"
-            description="Accessibility-first design allows for voice-guided reporting for faster intake during emergencies."
-            onClick={triggerVoiceAssistant}
-            highlight={true}
-          />
-          <FeatureCard
-            icon="fa-shield-cat" // Changed icon for variety
-            title="End-to-End Encryption"
-            description="All data is encrypted in transit and at rest using AES-256 standards. Only authorized officers hold the decryption keys."
-            to="/about"
-          />
-        </div>
-      </section>
+      {/* --- FEATURES GRID (Glassmorphism) --- */}
+      <section className="relative py-32 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-white/5">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-20">
+            <span className="text-blue-600 dark:text-blue-500 font-bold uppercase tracking-widest text-xs">Core Infrastructure</span>
+            <h2 className="text-3xl md:text-5xl font-black mt-3 mb-6 text-slate-900 dark:text-white">Designed for <span className="text-blue-600 dark:text-white">Speed & Safety</span></h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-500 dark:to-purple-500 mx-auto rounded-full"></div>
+          </div>
 
-      {/* 4. Action Banner (Blue/Red Context) */}
-      <section className="bg-slate-900 text-white py-20 border-t border-slate-800">
-        <div className="max-w-4xl mx-auto text-center px-6">
-          <i className="fas fa-triangle-exclamation text-amber-500 text-4xl mb-6"></i>
-          <h2 className="text-2xl font-bold mb-4">Is a child in immediate danger?</h2>
-          <p className="text-slate-400 mb-8 max-w-2xl mx-auto">
-            This portal is for reporting incidents for investigation. If there is an ongoing emergency or life-threatening situation, do not use this website.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <a href="tel:119" className="bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-lg font-bold text-lg transition-colors flex items-center justify-center gap-2">
-              <i className="fas fa-phone"></i> Call 119
-            </a>
-            <a href="tel:1929" className="bg-white/10 hover:bg-white/20 text-white px-8 py-3 rounded-lg font-bold text-lg transition-colors flex items-center justify-center gap-2">
-              <i className="fas fa-phone"></i> Call 1929 (Child Line)
-            </a>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <GlassCard
+              delay={0.2}
+              icon="fa-mask"
+              title="Total Anonymity"
+              desc="Our zero-knowledge architecture ensures your identity remains hidden. We strip all metadata from submissions."
+            />
+            <GlassCard
+              delay={0.4}
+              icon="fa-bolt"
+              title="Real-Time Response"
+              desc="Reports are routed instantly to the nearest dedicated child protection unit. No paperwork delays."
+            />
+            <GlassCard
+              delay={0.6}
+              icon="fa-fingerprint"
+              title="Secure Evidence"
+              desc="Photos and audio recordings are encrypted on-device before transmission. Tamper-proof evidence logging."
+            />
           </div>
         </div>
       </section>

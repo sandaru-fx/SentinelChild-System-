@@ -22,6 +22,7 @@ export default function AdminLayout({ user, onLogout }: { user: Admin | null; on
         { name: 'Live Chat', path: '/admin/chat', icon: 'fa-headset' },
         { name: 'Analytics', path: '/admin/analytics', icon: 'fa-chart-line' },
         { name: 'Task Board', path: '/admin/tasks', icon: 'fa-clipboard-check' },
+        { name: 'Inquiries', path: '/admin/inquiries', icon: 'fa-microphone-lines' },
         { name: 'Officers', path: '/admin/users', icon: 'fa-users-gear' }, // Updated Path
         { name: 'Settings', path: '/admin/profile', icon: 'fa-cog' },
     ];

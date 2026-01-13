@@ -2,7 +2,7 @@
 import { Report, ReportStatus, Admin, AuditLog, ChatSession, ChatMessage } from '../types';
 import { mockApi } from './mockApi';
 
-const N8N_BASE_URL = 'https://sentinelchild-system.onrender.com';
+const N8N_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 const isDemo = () => false; // Disable demo mode since we are using the live backend
 
 export const api = {
@@ -214,6 +214,31 @@ export const api = {
       });
     } catch (error) {
       await mockApi.markAsRead(sessionId);
+    }
+  },
+
+  getInquiries: async (token: string): Promise<any[]> => {
+    try {
+      const response = await fetch(`${N8N_BASE_URL}/admin/inquiries`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('API getInquiries Error:', error);
+      return [];
+    }
+  },
+
+  deleteInquiry: async (id: string, token: string): Promise<boolean> => {
+    try {
+      const response = await fetch(`${N8N_BASE_URL}/admin/inquiries/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('API deleteInquiry Error:', error);
+      return false;
     }
   }
 };

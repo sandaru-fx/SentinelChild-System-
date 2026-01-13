@@ -3,6 +3,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Admin } from '../types';
 import { useTranslation } from '../context/LanguageContext';
+import ThemeToggle from './ThemeToggle';
 
 export const Navbar = ({ user, onLogout }: { user: Admin | null; onLogout: () => void }) => {
   const location = useLocation();
@@ -69,8 +70,9 @@ export const Navbar = ({ user, onLogout }: { user: Admin | null; onLogout: () =>
               </button>
             </div>
 
-            <div className="h-8 w-[1px] bg-slate-200 hidden lg:block"></div>
+            <ThemeToggle />
 
+            <div className="h-8 w-[1px] bg-slate-200 hidden lg:block"></div>
             {!user ? (
               <Link
                 to="/admin-login"
@@ -115,6 +117,6 @@ export const Navbar = ({ user, onLogout }: { user: Admin | null; onLogout: () =>
 
         </div>
       </div>
-    </nav>
+    </nav >
   );
 };

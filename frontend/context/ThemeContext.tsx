@@ -1,38 +1,47 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-type Theme = 'light' | 'dark';
+type Theme = 'dark' | 'light';
 
 interface ThemeContextType {
     theme: Theme;
     toggleTheme: () => void;
+    setTheme: (theme: Theme) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-    const [theme, setTheme] = useState<Theme>(() => {
-        // Check localStorage first
-        const saved = localStorage.getItem('chars_theme');
-        if (saved === 'light' || saved === 'dark') return saved;
-        // Fallback to system preference
-        if (window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
-        return 'light';
+    const [theme, setThemeState] = useState<Theme>(() => {
+        // Check local storage or system preference
+        if (typeof window !== 'undefined') {
+            const savedTheme = localStorage.getItem('chars-theme') as Theme;
+            if (savedTheme) {
+                return savedTheme;
+            }
+            if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                return 'dark'; // Default to dark if system is dark
+            }
+        }
+        return 'dark'; // Default to dark general preference
     });
 
     useEffect(() => {
         const root = window.document.documentElement;
         root.classList.remove('light', 'dark');
         root.classList.add(theme);
-        localStorage.setItem('chars_theme', theme);
+        localStorage.setItem('chars-theme', theme);
     }, [theme]);
 
     const toggleTheme = () => {
-        setTheme(prev => prev === 'light' ? 'dark' : 'light');
+        setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    };
+
+    const setTheme = (newTheme: Theme) => {
+        setThemeState(newTheme);
     };
 
     return (
-        <ThemeContext.Provider value={{ theme, toggleTheme }}>
+        <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
             {children}
         </ThemeContext.Provider>
     );
