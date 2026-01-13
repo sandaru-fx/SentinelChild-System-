@@ -3,6 +3,7 @@ import { api } from '../services/api';
 import { Report, ReportStatus, Admin, ChatSession } from '../types';
 
 export default function AdminDashboardPage({ user }: { user: Admin | null }) {
+  const [voiceCount, setVoiceCount] = useState(0);
   const [reports, setReports] = useState<Report[]>([]);
   const [chats, setChats] = useState<ChatSession[]>([]);
 
@@ -13,6 +14,10 @@ export default function AdminDashboardPage({ user }: { user: Admin | null }) {
         setReports(r);
         const c = await api.getChatSessions(user.token);
         setChats(c);
+
+        // Fetch Voice Inquiries Count
+        const inq = await api.getInquiries(user.token);
+        setVoiceCount((inq || []).filter((i: any) => i.is_voice).length);
       }
       fetchData();
     }
@@ -21,8 +26,8 @@ export default function AdminDashboardPage({ user }: { user: Admin | null }) {
   const stats = {
     total: reports.length,
     pending: reports.filter(r => r.status === ReportStatus.PENDING).length,
-    active: reports.filter(r => r.status === ReportStatus.INVESTIGATING).length,
-    chats: chats.filter(s => s.status === 'ACTIVE').length
+    cases: reports.filter(r => r.status === ReportStatus.INVESTIGATING).length,
+    voice: voiceCount
   };
 
   return (
@@ -36,16 +41,16 @@ export default function AdminDashboardPage({ user }: { user: Admin | null }) {
           <div className="text-3xl font-bold text-[var(--color-text-primary)]">{stats.total}</div>
         </div>
         <div className="bg-[var(--color-surface)] p-6 rounded-xl border border-[var(--color-border)] shadow-sm">
-          <div className="text-[var(--color-text-secondary)] text-sm font-medium mb-1">Pending Review</div>
-          <div className="text-3xl font-bold text-amber-500">{stats.pending}</div>
+          <div className="text-[var(--color-text-secondary)] text-sm font-medium mb-1">Voice Inquiries</div>
+          <div className="text-3xl font-bold text-purple-600">{stats.voice}</div>
         </div>
         <div className="bg-[var(--color-surface)] p-6 rounded-xl border border-[var(--color-border)] shadow-sm">
           <div className="text-[var(--color-text-secondary)] text-sm font-medium mb-1">Active Cases</div>
-          <div className="text-3xl font-bold text-blue-500">{stats.active}</div>
+          <div className="text-3xl font-bold text-blue-500">{stats.cases}</div>
         </div>
         <div className="bg-[var(--color-surface)] p-6 rounded-xl border border-[var(--color-border)] shadow-sm">
-          <div className="text-[var(--color-text-secondary)] text-sm font-medium mb-1">Active Chats</div>
-          <div className="text-3xl font-bold text-emerald-500">{stats.chats}</div>
+          <div className="text-[var(--color-text-secondary)] text-sm font-medium mb-1">Pending Review</div>
+          <div className="text-3xl font-bold text-amber-500">{stats.pending}</div>
         </div>
       </div>
 

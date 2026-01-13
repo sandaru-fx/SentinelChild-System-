@@ -35,6 +35,7 @@ func main() {
 		log.Fatalf("failed connect mongo: %v", err)
 	}
 	log.Println("✅ MongoDB connection established successfully")
+	log.Println("🚀 CHARS BACKEND UPDATED v2.0 - INQUIRIES FIXED")
 	defer db.Close(ctx, client)
 
 	r := mux.NewRouter()

@@ -31,8 +31,21 @@ export const api = {
   },
 
   login: async (email: string, password?: string): Promise<{ success: boolean; admin?: Admin; token?: string }> => {
-    if (isDemo() || (email === 'admin@chars.gov' && password === 'admin123')) {
-      return mockApi.login(email);
+    // Override: Use Real Backend but with a 'Cheat Key' for the demo account
+    if (email === 'admin@chars.gov' && password === 'admin123') {
+      return {
+        success: true,
+        token: 'CHARS_DEMO_TOKEN',
+        admin: {
+          id: 'demo_admin',
+          email: 'admin@chars.gov',
+          name: 'Officer Sarah',
+          role: 'super_admin',
+          avatar_url: 'https://ui-avatars.com/api/?name=Sarah+Officer&background=0D8ABC&color=fff',
+          permissions: ['all'],
+          last_active: new Date().toISOString()
+        }
+      };
     }
     try {
       const response = await fetch(`${N8N_BASE_URL}/admin-login`, {

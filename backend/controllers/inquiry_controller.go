@@ -23,6 +23,7 @@ import (
 // CreateInquiry handles voice/text inquiry submission
 func CreateInquiry(client *mongo.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("📢 CreateInquiry ENDPOINT HIT") // DEBUG LOG
 		contentType := r.Header.Get("Content-Type")
 
 		var inquiry models.Inquiry
@@ -33,18 +34,17 @@ func CreateInquiry(client *mongo.Client) http.HandlerFunc {
 		if contentType == "application/json" {
 			// Handle General Inquiry (JSON)
 			if err := json.NewDecoder(r.Body).Decode(&inquiry); err != nil {
+				fmt.Printf("❌ Invalid JSON Error: %v\n", err) // DEBUG LOG
 				http.Error(w, "Invalid JSON", http.StatusBadRequest)
 				return
 			}
 			inquiry.Type = "general"
 			inquiry.IsVoice = false
 		} else {
-			// Handle Voice Inquiry (Multipart) - assuming default or explicit multipart
+			// Handle Voice Inquiry (Multipart)
 			// Parse multipart form (max 10MB)
 			if err := r.ParseMultipartForm(10 << 20); err != nil {
-				// Fallback or error if strictly multipart expected for non-json
-				// But let's check if it might be a simple form post without file?
-				// For now assuming it is the voice flow we built
+				// Continue if it's not multipart, though typically it should be for voice
 			}
 
 			transcription := r.FormValue("transcription")
@@ -57,28 +57,26 @@ func CreateInquiry(client *mongo.Client) http.HandlerFunc {
 				defer file.Close()
 				isVoice = true
 
-				// Create uploads directory if it doesn't exist
 				uploadDir := "./uploads/voice_notes"
 				os.MkdirAll(uploadDir, os.ModePerm)
 
-				// Generate unique filename
 				filename := fmt.Sprintf("%d%s", time.Now().UnixNano(), filepath.Ext(handler.Filename))
 				filePath := filepath.Join(uploadDir, filename)
 
-				// Save file
 				dst, err := os.Create(filePath)
 				if err != nil {
+					fmt.Printf("❌ File Create Error: %v\n", err) // DEBUG LOG
 					http.Error(w, "Unable to save audio file", http.StatusInternalServerError)
 					return
 				}
 				defer dst.Close()
 
 				if _, err := io.Copy(dst, file); err != nil {
+					fmt.Printf("❌ File Write Error: %v\n", err) // DEBUG LOG
 					http.Error(w, "Unable to write file", http.StatusInternalServerError)
 					return
 				}
 
-				// Set URL path
 				audioURL = "/uploads/voice_notes/" + filename
 			}
 
@@ -88,7 +86,7 @@ func CreateInquiry(client *mongo.Client) http.HandlerFunc {
 			if isVoice {
 				inquiry.Type = "voice"
 			} else {
-				inquiry.Type = "general" // Fallback if submitted via form-data without audio?
+				inquiry.Type = "general"
 			}
 		}
 
@@ -102,10 +100,12 @@ func CreateInquiry(client *mongo.Client) http.HandlerFunc {
 
 		_, err := collection.InsertOne(ctx, inquiry)
 		if err != nil {
+			fmt.Printf("❌ Failed to insert inquiry: %v\n", err) // DEBUG LOG
 			http.Error(w, "Failed to save inquiry", http.StatusInternalServerError)
 			return
 		}
 
+		fmt.Printf("✅ Inquiry Saved! ID: %s, Type: %s, Name: %s\n", inquiry.ID.Hex(), inquiry.Type, inquiry.Name) // DEBUG LOG
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(inquiry)
 	}
@@ -114,6 +114,7 @@ func CreateInquiry(client *mongo.Client) http.HandlerFunc {
 // GetInquiries fetches all inquiries (sorted by new)
 func GetInquiries(client *mongo.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("🔍 GetInquiries ENDPOINT HIT") // DEBUG LOG
 
 		dbName := os.Getenv("DB_NAME")
 		if dbName == "" {
@@ -128,6 +129,7 @@ func GetInquiries(client *mongo.Client) http.HandlerFunc {
 
 		cursor, err := collection.Find(ctx, bson.M{}, opts)
 		if err != nil {
+			fmt.Printf("❌ Find Error: %v\n", err) // DEBUG LOG
 			http.Error(w, "Error fetching inquiries", http.StatusInternalServerError)
 			return
 		}
@@ -135,10 +137,12 @@ func GetInquiries(client *mongo.Client) http.HandlerFunc {
 
 		var inquiries []models.Inquiry
 		if err = cursor.All(ctx, &inquiries); err != nil {
+			fmt.Printf("❌ Decode Error: %v\n", err) // DEBUG LOG
 			http.Error(w, "Error decoding inquiries", http.StatusInternalServerError)
 			return
 		}
 
+		fmt.Printf("📦 Found %d inquiries in DB\n", len(inquiries)) // DEBUG LOG
 		json.NewEncoder(w).Encode(inquiries)
 	}
 }

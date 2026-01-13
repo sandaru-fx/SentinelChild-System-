@@ -20,7 +20,7 @@ export default function AdminInquiriesPage({ user }: { user: Admin | null }) {
         try {
             setLoading(true);
             const data = await api.getInquiries(user.token);
-            setInquiries(data || []);
+            setInquiries((data || []).filter(i => i.is_voice));
         } catch (error) {
             console.error('Failed to fetch inquiries:', error);
         } finally {
