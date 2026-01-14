@@ -102,7 +102,7 @@ export default function AdminCasesPage({ user }: { user: Admin | null }) {
             const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || '' });
             const response = await ai.models.generateContent({
                 model: 'gemini-2.0-flash',
-                contents: `Analyze the following child harassment report.Status: ${ selectedReport.status }. 
+                contents: `Analyze the following child harassment report.Status: ${selectedReport.status}. 
             Report Description: "${selectedReport.description}"
             Provide a concise summary and recommended next steps for a case officer.`,
             });
@@ -142,13 +142,13 @@ export default function AdminCasesPage({ user }: { user: Admin | null }) {
                     <div className="flex bg-[var(--color-bg)] p-1 rounded-xl border border-[var(--color-border)] overflow-hidden relative">
                         <button
                             onClick={() => setViewMode('CASES')}
-                            className={`flex - 1 py - 2.5 text - xs font - bold rounded - lg transition - all duration - 300 relative z - 10 flex items - center justify - center gap - 2 ${ viewMode === 'CASES' ? 'bg-[var(--color-surface)] shadow-sm text-blue-600' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface)]/50' } `}
+                            className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all duration-300 relative z-10 flex items-center justify-center gap-2 ${viewMode === 'CASES' ? 'bg-[var(--color-surface)] shadow-sm text-blue-600' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface)]/50'} `}
                         >
                             <i className="fas fa-folder-open"></i> Cases
                         </button>
                         <button
                             onClick={() => setViewMode('INQUIRIES')}
-                            className={`flex - 1 py - 2.5 text - xs font - bold rounded - lg transition - all duration - 300 relative z - 10 flex items - center justify - center gap - 2 ${ viewMode === 'INQUIRIES' ? 'bg-[var(--color-surface)] shadow-sm text-emerald-600' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface)]/50' } `}
+                            className={`flex-1 py-2.5 text-xs font-bold rounded-lg transition-all duration-300 relative z-10 flex items-center justify-center gap-2 ${viewMode === 'INQUIRIES' ? 'bg-[var(--color-surface)] shadow-sm text-emerald-600' : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface)]/50'} `}
                         >
                             <i className="fas fa-envelope-open-text"></i> Inquiries
                         </button>
@@ -205,15 +205,15 @@ export default function AdminCasesPage({ user }: { user: Admin | null }) {
                                         setEditingPriority(report.priority || 'MEDIUM');
                                         setAiSummary(null);
                                     }}
-                                    className={`w - full text - left p - 4 hover: bg - [var(--color - bg)]transition - all group ${ selectedReport?.id === report.id ? 'bg-blue-50 dark:bg-blue-900/10' : '' } `}
+                                    className={`w-full text-left p-4 hover:bg-[var(--color-bg)] transition-all group ${selectedReport?.id === report.id ? 'bg-blue-50 dark:bg-blue-900/10' : ''} `}
                                 >
                                     <div className="flex items-start gap-4">
-                                        <div className={`w - 10 h - 10 rounded - full flex items - center justify - center shrink - 0 text - sm font - bold ${ selectedReport?.id === report.id ? 'bg-blue-200 text-blue-700 dark:bg-blue-800 dark:text-blue-200' : 'bg-[var(--color-bg)] text-[var(--color-text-secondary)] group-hover:bg-blue-100 group-hover:text-blue-600 dark:group-hover:bg-blue-900/40' } `}>
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-sm font-bold ${selectedReport?.id === report.id ? 'bg-blue-200 text-blue-700 dark:bg-blue-800 dark:text-blue-200' : 'bg-[var(--color-bg)] text-[var(--color-text-secondary)] group-hover:bg-blue-100 group-hover:text-blue-600 dark:group-hover:bg-blue-900/40'} `}>
                                             {report.childName ? report.childName.charAt(0).toUpperCase() : '#'}
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex justify-between items-center mb-1">
-                                                <h4 className={`font - semibold text - sm truncate ${ selectedReport?.id === report.id ? 'text-blue-700 dark:text-blue-300' : 'text-[var(--color-text-primary)]' } `}>
+                                                <h4 className={`font-semibold text-sm truncate ${selectedReport?.id === report.id ? 'text-blue-700 dark:text-blue-300' : 'text-[var(--color-text-primary)]'} `}>
                                                     {report.childName || "Anonymized Subject"}
                                                 </h4>
                                                 <span className="text-[10px] text-[var(--color-text-secondary)] shrink-0">{new Date(report.createdAt).toLocaleDateString()}</span>
@@ -233,15 +233,15 @@ export default function AdminCasesPage({ user }: { user: Admin | null }) {
                                 <button
                                     key={inq.id}
                                     onClick={() => setSelectedInquiry(inq)}
-                                    className={`w - full text - left p - 4 hover: bg - [var(--color - bg)]transition - all group ${ selectedInquiry?.id === inq.id ? 'bg-emerald-50 dark:bg-emerald-900/10' : '' } `}
+                                    className={`w-full text-left p-4 hover:bg-[var(--color-bg)] transition-all group ${selectedInquiry?.id === inq.id ? 'bg-emerald-50 dark:bg-emerald-900/10' : ''} `}
                                 >
                                     <div className="flex items-start gap-4">
-                                        <div className={`w - 10 h - 10 rounded - full flex items - center justify - center shrink - 0 text - lg ${ selectedInquiry?.id === inq.id ? 'bg-emerald-200 text-emerald-700 dark:bg-emerald-800 dark:text-emerald-200' : 'bg-[var(--color-bg)] text-[var(--color-text-secondary)] group-hover:bg-emerald-100 group-hover:text-emerald-600 dark:group-hover:bg-emerald-900/40' } `}>
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-lg ${selectedInquiry?.id === inq.id ? 'bg-emerald-200 text-emerald-700 dark:bg-emerald-800 dark:text-emerald-200' : 'bg-[var(--color-bg)] text-[var(--color-text-secondary)] group-hover:bg-emerald-100 group-hover:text-emerald-600 dark:group-hover:bg-emerald-900/40'} `}>
                                             <i className="fas fa-user"></i>
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex justify-between items-center mb-1">
-                                                <h4 className={`font - semibold text - sm truncate ${ selectedInquiry?.id === inq.id ? 'text-emerald-700 dark:text-emerald-300' : 'text-[var(--color-text-primary)]' } `}>
+                                                <h4 className={`font-semibold text-sm truncate ${selectedInquiry?.id === inq.id ? 'text-emerald-700 dark:text-emerald-300' : 'text-[var(--color-text-primary)]'} `}>
                                                     {inq.name || "Anonymous"}
                                                 </h4>
                                                 <span className="text-[10px] text-[var(--color-text-secondary)] shrink-0">{new Date(inq.created_at).toLocaleDateString()}</span>
@@ -273,11 +273,10 @@ export default function AdminCasesPage({ user }: { user: Admin | null }) {
                                         <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">{selectedReport.childName}</h1>
                                         <div className="flex items-center gap-2">
                                             <StatusBadge status={selectedReport.status} size="lg" />
-                                            <span className={`px - 3 py - 1 rounded - full text - [10px] font - black uppercase tracking - widest ${
-    selectedReport.priority === 'HIGH' ? 'bg-rose-100 text-rose-600 border border-rose-200' :
-    selectedReport.priority === 'MEDIUM' ? 'bg-amber-100 text-amber-600 border border-amber-200' :
-        'bg-blue-100 text-blue-600 border border-blue-200'
-} `}>
+                                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${selectedReport.priority === 'HIGH' ? 'bg-rose-100 text-rose-600 border border-rose-200' :
+                                                    selectedReport.priority === 'MEDIUM' ? 'bg-amber-100 text-amber-600 border border-amber-200' :
+                                                        'bg-blue-100 text-blue-600 border border-blue-200'
+                                                } `}>
                                                 {selectedReport.priority || 'MEDIUM'}
                                             </span>
                                         </div>
@@ -303,11 +302,10 @@ export default function AdminCasesPage({ user }: { user: Admin | null }) {
                                     <button
                                         key={tab}
                                         onClick={() => setActiveDetailTab(tab)}
-                                        className={`px - 6 py - 3 text - [10px] font - black uppercase tracking - widest transition - all border - b - 2 ${
-    activeDetailTab === tab
-    ? 'border-blue-600 text-blue-600'
-    : 'border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
-} `}
+                                        className={`px-6 py-3 text-[10px] font-black uppercase tracking-widest transition-all border-b-2 ${activeDetailTab === tab
+                                                ? 'border-blue-600 text-blue-600'
+                                                : 'border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+                                            } `}
                                     >
                                         {tab}
                                     </button>
@@ -334,9 +332,8 @@ export default function AdminCasesPage({ user }: { user: Admin | null }) {
                                                     {i !== (selectedReport.history?.length || 0) - 1 && (
                                                         <div className="absolute left-[11px] top-6 bottom-0 w-[2px] bg-slate-100 dark:bg-slate-800"></div>
                                                     )}
-                                                    <div className={`w - 6 h - 6 rounded - full shrink - 0 flex items - center justify - center text - [10px] z - 10 ${
-    i === 0 ? 'bg-blue-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
-} `}>
+                                                    <div className={`w-6 h-6 rounded-full shrink-0 flex items-center justify-center text-[10px] z-10 ${i === 0 ? 'bg-blue-600 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
+                                                        } `}>
                                                         <i className="fas fa-check"></i>
                                                     </div>
                                                     <div className="flex-1 pb-6">
@@ -436,14 +433,14 @@ export default function AdminCasesPage({ user }: { user: Admin | null }) {
                                                         <div key={i} className="aspect-square bg-[var(--color-bg)] rounded-xl relative group overflow-hidden border border-[var(--color-border)]">
                                                             <img src={src} alt="Evidence" className="w-full h-full object-cover transition-transform group-hover:scale-110" />
                                                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                                                <button 
+                                                                <button
                                                                     onClick={() => setLockerSrc(src)}
                                                                     className="w-10 h-10 bg-white/20 backdrop-blur rounded-lg text-white hover:bg-white/40 flex items-center justify-center transition-all hover:scale-110"
                                                                     title="View Securely"
                                                                 >
                                                                     <i className="fas fa-eye text-sm"></i>
                                                                 </button>
-                                                                <button 
+                                                                <button
                                                                     onClick={() => setLockerSrc(src)}
                                                                     className="w-10 h-10 bg-white/20 backdrop-blur rounded-lg text-white hover:bg-white/40 flex items-center justify-center transition-all hover:scale-110"
                                                                     title="Apply Redaction"
@@ -544,7 +541,7 @@ export default function AdminCasesPage({ user }: { user: Admin | null }) {
                                 </div>
                             </div>
                             <div className="p-6 border-t border-[var(--color-border)] bg-[var(--color-bg)]">
-                                <a href={`mailto:${ selectedInquiry.email } `} className="inline-flex items-center gap-2 bg-emerald-600 text-white px-6 py-3 rounded-lg font-bold text-sm hover:bg-emerald-700 transition-colors">
+                                <a href={`mailto:${selectedInquiry.email} `} className="inline-flex items-center gap-2 bg-emerald-600 text-white px-6 py-3 rounded-lg font-bold text-sm hover:bg-emerald-700 transition-colors">
                                     <i className="fas fa-reply"></i> Reply via Email
                                 </a>
                             </div>
@@ -560,9 +557,9 @@ export default function AdminCasesPage({ user }: { user: Admin | null }) {
 
             <AnimatePresence>
                 {lockerSrc && (
-                    <EvidenceLocker 
-                        src={lockerSrc} 
-                        onClose={() => setLockerSrc(null)} 
+                    <EvidenceLocker
+                        src={lockerSrc}
+                        onClose={() => setLockerSrc(null)}
                         onSave={(blob) => {
                             console.log('Regacted blob ready:', blob);
                             setLockerSrc(null);
