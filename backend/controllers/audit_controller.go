@@ -7,8 +7,8 @@ import (
 	"os"
 	"time"
 
-	"chars/backend/db"
-	"chars/backend/models"
+	"github.com/sandaru-fx/SentinelChild-System/backend/db"
+	"github.com/sandaru-fx/SentinelChild-System/backend/models"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"

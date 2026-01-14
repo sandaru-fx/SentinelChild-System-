@@ -79,11 +79,16 @@ export default function VoiceAssistant() {
       recorder.start();
       mediaRecorderRef.current = recorder;
 
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      console.error('Voice Assistant Error:', err);
       setIsActive(false);
       setIsOpen(false);
-      alert("Microphone access is required for the Voice Assistant.");
+
+      if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        alert("Microphone access is required for the Voice Assistant. Please check your browser permissions.");
+      } else {
+        alert(`System Initialization Error: ${err.message || "Unknown error"}. Check your API configuration.`);
+      }
     }
   };
 

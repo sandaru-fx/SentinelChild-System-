@@ -1,7 +1,7 @@
 
 import { GoogleGenAI, LiveServerMessage, Modality, Blob } from '@google/genai';
 
-const genAI = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || '' });
+const genAI = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
 
 // Custom decoding function as per guidelines
 export const decodeBase64 = (base64: string) => {
@@ -54,7 +54,7 @@ export class GeminiLiveAssistant {
   private stream: MediaStream | null = null;
 
   async start(onTranscription: (text: string, isUser: boolean) => void) {
-    const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
     this.inputAudioContext = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
     this.outputAudioContext = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
