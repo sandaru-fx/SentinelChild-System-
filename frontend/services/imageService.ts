@@ -7,7 +7,7 @@ export const imageService = {
    */
   generateHeroBackground: async (): Promise<string | null> => {
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
       const prompt = "A professional, ultra-high-quality, minimalist background for a law enforcement portal focused on child safety. Soft blue and white color palette with subtle abstract geometric depth. The image should evoke a sense of protection, trust, and transparency. 4k resolution style, very clean, no text, no faces, blurred architectural elements.";
 
       const response = await ai.models.generateContent({

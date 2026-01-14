@@ -134,11 +134,13 @@ export default function VoiceAssistant() {
       });
 
       if (response.ok) {
+        const data = await response.json();
         setShowSuccess(true);
+        if (data.ID) {
+          setTranscriptions(prev => [...prev, { text: `Official Inquiry Submitted. Reference: #${data.ID.slice(-6).toUpperCase()}`, isUser: false }]);
+        }
         setTranscriptions([]);
         setHasAudio(false);
-        // Auto close after 5 seconds if user desires, or let them close
-        // setIsOpen(false); 
       } else {
         alert("Failed to submit inquiry. Please try again.");
       }
@@ -180,7 +182,7 @@ export default function VoiceAssistant() {
               </div>
               <h3 className="text-xl font-bold text-slate-800 dark:text-white">Report Submitted</h3>
               <p className="text-sm text-slate-500 dark:text-slate-400 max-w-[200px]">
-                Your voice inquiry has been securely received. Reference ID: <span className="font-mono bg-slate-200 dark:bg-slate-800 px-1 rounded">#{Math.floor(Math.random() * 90000) + 10000}</span>
+                Your voice inquiry has been securely received. Thank you for your contribution to child safety.
               </p>
               <div className="pt-4 w-full">
                 <button

@@ -13,7 +13,9 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/sandaru-fx/SentinelChild-System/backend/db"
+	"github.com/sandaru-fx/SentinelChild-System/backend/middleware"
 	"github.com/sandaru-fx/SentinelChild-System/backend/models"
+	"github.com/sandaru-fx/SentinelChild-System/backend/utils"
 )
 
 func collection(client *mongo.Client) *mongo.Collection {
@@ -120,6 +122,11 @@ func GetReport(client *mongo.Client) http.HandlerFunc {
 			return
 		}
 		json.NewEncoder(w).Encode(out)
+
+		// Log the view action
+		if claims, ok := r.Context().Value(middleware.AdminContextKey).(*utils.Claims); ok {
+			LogActivity(client, claims.AdminID, claims.Role, "VIEW_CASE", id, "Admin viewed case details")
+		}
 	}
 }
 
@@ -127,9 +134,10 @@ func GetReport(client *mongo.Client) http.HandlerFunc {
 func UpdateReport(client *mongo.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req struct {
-			ID     string `json:"id"`
-			Status string `json:"status"`
-			Notes  string `json:"notes"`
+			ID       string `json:"id"`
+			Status   string `json:"status"`
+			Notes    string `json:"notes"`
+			Priority string `json:"priority"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -152,21 +160,95 @@ func UpdateReport(client *mongo.Client) http.HandlerFunc {
 			return
 		}
 
+		col := collection(client)
+
+		// Fetch current report to see if status changed
+		var oldReport models.Report
+		_ = col.FindOne(context.Background(), bson.M{"_id": objID}).Decode(&oldReport)
+
 		update := bson.M{
 			"$set": bson.M{
 				"status":     req.Status,
 				"adminNotes": req.Notes,
+				"priority":   req.Priority,
 				"updatedAt":  time.Now(),
 			},
 		}
 
-		col := collection(client)
+		// If status changed, push to history
+		adminID := "system"
+		adminRole := "system"
+		if claims, ok := r.Context().Value(middleware.AdminContextKey).(*utils.Claims); ok {
+			adminID = claims.AdminID
+			adminRole = claims.Role
+		}
+
+		if oldReport.Status != req.Status {
+			historyUpdate := models.StatusUpdate{
+				Status:    req.Status,
+				Officer:   adminID,
+				Timestamp: time.Now(),
+				Note:      req.Notes,
+			}
+			update["$push"] = bson.M{"history": historyUpdate}
+		}
+
 		res, err := col.UpdateByID(context.Background(), objID, update)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+
+		// Log the update action
+		LogActivity(client, adminID, adminRole, "UPDATE_CASE", id, "Admin updated case status/notes")
+
 		json.NewEncoder(w).Encode(res)
+	}
+}
+
+// AddInternalNote adds a private note to a report.
+func AddInternalNote(client *mongo.Client) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := mux.Vars(r)["id"]
+		var req struct {
+			Text string `json:"text"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		objID, err := primitive.ObjectIDFromHex(id)
+		if err != nil {
+			http.Error(w, "invalid id", http.StatusBadRequest)
+			return
+		}
+
+		adminID := "unknown"
+		if claims, ok := r.Context().Value(middleware.AdminContextKey).(*utils.Claims); ok {
+			adminID = claims.AdminID
+		}
+
+		note := models.InternalNote{
+			Author:    adminID,
+			Text:      req.Text,
+			Timestamp: time.Now(),
+		}
+
+		col := collection(client)
+		_, err = col.UpdateByID(context.Background(), objID, bson.M{
+			"$push": bson.M{"internalNotes": note},
+			"$set":  bson.M{"updatedAt": time.Now()},
+		})
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		LogActivity(client, adminID, "note", "ADD_INTERNAL_NOTE", id, "Added internal officer note")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]bool{"success": true})
 	}
 }
 

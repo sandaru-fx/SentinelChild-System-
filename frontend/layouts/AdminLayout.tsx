@@ -23,7 +23,11 @@ export default function AdminLayout({ user, onLogout }: { user: Admin | null; on
         { name: 'Analytics', path: '/admin/analytics', icon: 'fa-chart-line' },
         { name: 'Task Board', path: '/admin/tasks', icon: 'fa-clipboard-check' },
         { name: 'Inquiries', path: '/admin/inquiries', icon: 'fa-microphone-lines' },
-        { name: 'Officers', path: '/admin/users', icon: 'fa-users-gear' }, // Updated Path
+        { name: 'Content Manager', path: '/admin/resources', icon: 'fa-book-open-reader' },
+        { name: 'Emergency Contacts', path: '/admin/hotlines', icon: 'fa-phone-volume' },
+        { name: 'Policy Editor', path: '/admin/settings', icon: 'fa-file-shield' },
+        { name: 'Audit Logs', path: '/admin/audit', icon: 'fa-clipboard-list' },
+        { name: 'Officers', path: '/admin/users', icon: 'fa-users-gear' },
         { name: 'Settings', path: '/admin/profile', icon: 'fa-cog' },
     ];
 

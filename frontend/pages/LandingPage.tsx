@@ -5,7 +5,7 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import { motion } from 'framer-motion';
 import ProtectionShield from '../components/3d/ProtectionShield';
-import happyKids from '../assets/happy_kids.jpg';
+
 
 const GlassCard = ({ icon, title, desc, delay }: { icon: string, title: string, desc: string, delay: number }) => (
   <motion.div
@@ -31,17 +31,7 @@ export default function LandingPage() {
       {/* --- HERO SECTION --- */}
       <section className="relative min-h-screen flex flex-col pt-20">
 
-        {/* 1. Cinematic Background Layer */}
-        <div className="absolute inset-0 z-0">
-          <img
-            src={happyKids}
-            alt="Futures we protect"
-            className="w-full h-full object-cover brightness-100 dark:brightness-75 grayscale-[0.1]"
-          />
-          {/* Theme-aware Gradients for Seamless Blend */}
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-50 lg:via-slate-50/80 to-transparent dark:from-slate-950 dark:lg:via-slate-950/90 dark:to-slate-950/40"></div>
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-50 via-transparent to-transparent dark:from-slate-950"></div>
-        </div>
+
 
         {/* 2. 3D Experience Layer (Desktop Only) */}
         <div className="absolute top-0 right-0 w-full lg:w-1/2 h-full z-10 pointer-events-none lg:pointer-events-auto hidden lg:block opacity-80">

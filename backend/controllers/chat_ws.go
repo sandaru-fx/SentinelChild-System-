@@ -135,8 +135,18 @@ func (h *Hub) getActiveSessions() []models.ChatSession {
 }
 
 func (h *Hub) routeChatMessage(wsMsg WSMessage, raw []byte) {
-	// Persist to DB
-	// ... (implementation below)
+	h.Mu.Lock()
+	defer h.Mu.Unlock()
+
+	// Broadcast to user if they are online
+	if user, ok := h.UserClients[wsMsg.SessionID]; ok {
+		user.Send <- raw
+	}
+
+	// Broadcast to all admins
+	for _, admin := range h.AdminClients {
+		admin.Send <- raw
+	}
 }
 
 func (c *Client) ReadPump() {

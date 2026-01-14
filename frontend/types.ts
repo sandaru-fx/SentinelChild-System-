@@ -23,6 +23,19 @@ export interface Reporter {
   phone?: string;
 }
 
+export interface StatusUpdate {
+  status: ReportStatus;
+  officer: string;
+  timestamp: string;
+  note?: string;
+}
+
+export interface InternalNote {
+  author: string;
+  text: string;
+  timestamp: string;
+}
+
 export interface Report {
   id: string;
   childName?: string;
@@ -32,9 +45,12 @@ export interface Report {
   reporter?: Reporter;
   evidence: string[]; // Base64 or Object URLs for this demo
   status: ReportStatus;
+  priority?: 'LOW' | 'MEDIUM' | 'HIGH';
   createdAt: string;
   updatedAt: string;
   adminNotes?: string;
+  history?: StatusUpdate[];
+  internalNotes?: InternalNote[];
 }
 
 export interface Admin {
@@ -49,10 +65,11 @@ export interface Admin {
 export interface AuditLog {
   id: string;
   adminId: string;
+  adminName?: string;
   action: string;
   timestamp: string;
-  reportId: string;
-  details: string;
+  targetId?: string;
+  details?: string;
 }
 
 // Live Chat Types
@@ -99,4 +116,46 @@ export interface Inquiry {
   is_voice: boolean;
   created_at: string;
   status: string;
+}
+
+export enum ResourceType {
+  ARTICLE = 'ARTICLE',
+  VIDEO = 'VIDEO',
+  GUIDE = 'GUIDE'
+}
+
+export interface Resource {
+  id: string;
+  title: string;
+  description: string;
+  type: ResourceType;
+  icon: string;
+  readTime: string;
+  content: string;
+  link?: string;
+  category: string;
+  language: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Hotline {
+  id: string;
+  name: string;
+  number: string;
+  description: string;
+  icon: string;
+  category: string;
+  language: string;
+  priority: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Setting {
+  id?: string;
+  key: string;
+  value: string;
+  language: string;
+  updatedAt?: string;
 }

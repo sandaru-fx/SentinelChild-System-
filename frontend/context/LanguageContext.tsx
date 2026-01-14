@@ -1,38 +1,42 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-type Language = 'en' | 'si';
+type Language = 'en' | 'si' | 'ta';
 
 interface Translations {
   [key: string]: {
     en: string;
     si: string;
+    ta: string;
   };
 }
 
 const translations: Translations = {
   // Navbar
-  home: { en: 'Home', si: 'මුල් පිටුව' },
-  submitReport: { en: 'Submit Report', si: 'වාර්තාවක් යොමුකරන්න' },
-  checkStatus: { en: 'Check Status', si: 'තත්ත්වය පරීක්ෂා කරන්න' },
-  adminLogin: { en: 'Admin Login', si: 'පරිපාලක පිවිසුම' },
-  dashboard: { en: 'Dashboard', si: 'පුවරුව' },
-  profile: { en: 'Profile', si: 'පැතිකඩ' },
-  logout: { en: 'Logout', si: 'පිටවෙන්න' },
-  about: { en: 'About Us', si: 'අප ගැන' },
-  contact: { en: 'Contact', si: 'සම්බන්ධ වන්න' },
-  
+  home: { en: 'Home', si: 'මුල් පිටුව', ta: 'මුල්පිටුව' },
+  submitReport: { en: 'Submit Report', si: 'වාර්තාවක් යොමුකරන්න', ta: 'புகார் அளிக்கவும்' },
+  checkStatus: { en: 'Check Status', si: 'තත්ත්වය පරීක්ෂා කරන්න', ta: 'நிலைமையைச் சரிபார்க்கவும்' },
+  adminLogin: { en: 'Admin Login', si: 'පරිපාලක පිවිසුම', ta: 'நிர்வாகி உள்நுழைவு' },
+  dashboard: { en: 'Dashboard', si: 'පුවරුව', ta: 'டாஷ்போர்டு' },
+  profile: { en: 'Profile', si: 'පැතිකඩ', ta: 'சுயவிவரம்' },
+  logout: { en: 'Logout', si: 'පිටවෙන්න', ta: 'வெளியேறு' },
+  about: { en: 'About Us', si: 'අප ගැන', ta: 'எங்களைப் பற்றி' },
+  contact: { en: 'Contact', si: 'සම්බන්ධ වන්න', ta: 'தொடர்பு கொள்ளவும்' },
+  emergency: { en: 'Emergency', si: 'හදිසි අවස්ථා', ta: 'அவசர நிலை' },
+  resources: { en: 'Resources', si: 'සම්පත්', ta: 'ஆதாரங்கள்' },
+  privacy: { en: 'Privacy & Legal', si: 'පෞද්ගලිකත්වය සහ නීතිය', ta: 'தனியுரிமை மற்றும் சட்டம்' },
+
   // Landing Page
-  heroTitle: { en: 'Protecting Children, Empowering Citizens.', si: 'දරුවන් සුරකිමු, පුරවැසියන් සවිබල ගන්වමු.' },
-  heroSubtitle: { en: 'Break the Silence. Protect the Future.', si: 'නිශ්ශබ්දතාව බිඳින්න. අනාගතය සුරකින්න.' },
-  heroDesc: { en: 'The Child Harassment & Abuse Reporting System (CHARS) provides a secure, anonymous bridge to justice.', si: 'ළමා හිරිහැර සහ අපයෝජන වාර්තා කිරීමේ පද්ධතිය (CHARS) යුක්තිය ඉටුකිරීම සඳහා ආරක්ෂිත සහ නිර්නාමික පාලමක් සපයයි.' },
-  fileReportBtn: { en: 'File a Report', si: 'වාර්තාවක් ගොනු කරන්න' },
-  trackStatusBtn: { en: 'Track Status', si: 'තත්ත්වය පරීක්ෂා කරන්න' },
-  anonymousTitle: { en: 'Full Anonymity', si: 'පූර්ණ නිර්නාමිකභාවය' },
-  anonymousDesc: { en: 'We do not log IP addresses or personal metadata for anonymous reports.', si: 'නිර්නාමික වාර්තා සඳහා අපි IP ලිපින හෝ පුද්ගලික දත්ත සටහන් නොකරමු.' },
-  voiceTitle: { en: 'Voice Assistant', si: 'කටහඬ සහායක' },
-  voiceDesc: { en: 'Our AI Voice Guardian can guide you through the process step-by-step.', si: 'අපගේ AI කටහඬ සහායකයා ඔබට පියවරෙන් පියවර මග පෙන්වනු ඇත.' },
-  
+  heroTitle: { en: 'Protecting Children, Empowering Citizens.', si: 'දරුවන් සුරකිමු, පුරවැසියන් සවිබල ගන්වමු.', ta: 'குழந்தைகளைப் பாதுகாத்தல், குடிமக்களுக்கு அதிகாரம் அளித்தல்.' },
+  heroSubtitle: { en: 'Break the Silence. Protect the Future.', si: 'නිශ්ශබ්දතාව බිඳින්න. අනාගතය සුරකින්න.', ta: 'மௌனத்தை உடைக்கவும். எதிர்காலத்தைப் பாதுகாக்கவும்.' },
+  heroDesc: { en: 'The Child Harassment & Abuse Reporting System (CHARS) provides a secure, anonymous bridge to justice.', si: 'ළමා හිරිහැර සහ අපයෝජන වාර්තා කිරීමේ පද්ධතිය (CHARS) යුක්තිය ඉටුකිරීම සඳහා ආරක්ෂිත සහ නිර්නාමික පාලමක් සපයයි.', ta: 'குழந்தை துன்புறுத்தல் மற்றும் துஷ்பிரயோக புகார் அமைப்பு (CHARS) நீதிக்கு பாதுகாப்பான, அநாமதேய பாலத்தை வழங்குகிறது.' },
+  fileReportBtn: { en: 'File a Report', si: 'වාර්තාවක් ගොනු කරන්න', ta: 'ஒரு புகார் அளிக்கவும்' },
+  trackStatusBtn: { en: 'Track Status', si: 'තත්ත්වය පරීක්ෂා කරන්න', ta: 'நிலையைக் கண்காணிக்கவும்' },
+  anonymousTitle: { en: 'Full Anonymity', si: 'පූර්ණ නිර්නාමිකභාවය', ta: 'முழு அநாமதேயம்' },
+  anonymousDesc: { en: 'We do not log IP addresses or personal metadata for anonymous reports.', si: 'නිර්නාමික වාර්තා සඳහා අපි IP ලිපින හෝ පුද්ගලික දත්ත සටහන් නොකරමු.', ta: 'அநாமதேய புகார்களுக்கு நாங்கள் IP முகவரிகள் அல்லது தனிப்பட்ட மெட்டாடேட்டாவை பதிவு செய்ய மாட்டோம்.' },
+  voiceTitle: { en: 'Voice Assistant', si: 'කටහඬ සහායක', ta: 'குரல் உதவியாளர்' },
+  voiceDesc: { en: 'Our AI Voice Guardian can guide you through the process step-by-step.', si: 'අපගේ AI කටහඬ සහායකයා ඔබට පියවරෙන් පියවර මග පෙන්වනු ඇත.', ta: 'எங்கள் AI குரல் பாதுகாவலர் படிப்படியாக உங்களுக்கு வழிகாட்டும்.' },
+
   // Onboarding
   onboardingTitle: { en: 'Welcome to CHARS', si: 'CHARS වෙත ඔබව සාදරයෙන් පිළිගනිමු' },
   getStarted: { en: 'Get Started', si: 'ආරම්භ කරන්න' },
@@ -82,7 +86,7 @@ const translations: Translations = {
   action: { en: 'Action', si: 'ක්‍රියාව' },
   timestamp: { en: 'Timestamp', si: 'කාලමුද්‍රාව' },
   caseId: { en: 'Case ID', si: 'නඩු අංකය' },
-  
+
   // Common
   loading: { en: 'Loading...', si: 'පූරණය වෙමින් පවතී...' },
   error: { en: 'Error occurred', si: 'දෝෂයක් සිදුවී ඇත' }

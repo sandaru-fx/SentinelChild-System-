@@ -17,6 +17,13 @@ import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
 import AdminTaskBoardPage from './pages/AdminTaskBoardPage'; // Import AdminTaskBoardPage
 import AdminUsersPage from './pages/AdminUsersPage'; // Import AdminUsersPage
 import AdminInquiriesPage from './pages/AdminInquiriesPage';
+import EmergencyPage from './pages/EmergencyPage';
+import PrivacyPage from './pages/PrivacyPage';
+import EducationPage from './pages/EducationPage';
+import AdminResourcesPage from './pages/AdminResourcesPage';
+import AdminHotlinePage from './pages/AdminHotlinePage';
+import AdminSettingsPage from './pages/AdminSettingsPage';
+import AdminAuditLogsPage from './pages/AdminAuditLogsPage';
 import { Navbar } from './components/Navbar';
 
 import VoiceAssistant from './components/VoiceAssistant';
@@ -95,6 +102,9 @@ export default function App() {
               <Route path="/status" element={<><Navbar user={user} onLogout={handleLogout} /><main className="flex-grow"><StatusPage /></main><Footer /><VoiceAssistant /><LiveChat externalOpen={chatOpen} setExternalOpen={setChatOpen} /><SafetyCluster onOpenHelp={() => setChatOpen(true)} /></>} />
               <Route path="/about" element={<><Navbar user={user} onLogout={handleLogout} /><main className="flex-grow"><AboutPage /></main><Footer /><VoiceAssistant /><LiveChat externalOpen={chatOpen} setExternalOpen={setChatOpen} /><SafetyCluster onOpenHelp={() => setChatOpen(true)} /></>} />
               <Route path="/contact" element={<><Navbar user={user} onLogout={handleLogout} /><main className="flex-grow"><ContactPage /></main><Footer /><VoiceAssistant /><LiveChat externalOpen={chatOpen} setExternalOpen={setChatOpen} /><SafetyCluster onOpenHelp={() => setChatOpen(true)} /></>} />
+              <Route path="/emergency" element={<><Navbar user={user} onLogout={handleLogout} /><main className="flex-grow"><EmergencyPage /></main><Footer /><VoiceAssistant /><LiveChat externalOpen={chatOpen} setExternalOpen={setChatOpen} /><SafetyCluster onOpenHelp={() => setChatOpen(true)} /></>} />
+              <Route path="/privacy" element={<><Navbar user={user} onLogout={handleLogout} /><main className="flex-grow"><PrivacyPage /></main><Footer /><VoiceAssistant /><LiveChat externalOpen={chatOpen} setExternalOpen={setChatOpen} /><SafetyCluster onOpenHelp={() => setChatOpen(true)} /></>} />
+              <Route path="/resources" element={<><Navbar user={user} onLogout={handleLogout} /><main className="flex-grow"><EducationPage /></main><Footer /><VoiceAssistant /><LiveChat externalOpen={chatOpen} setExternalOpen={setChatOpen} /><SafetyCluster onOpenHelp={() => setChatOpen(true)} /></>} />
               <Route path="/admin-login" element={<><Navbar user={user} onLogout={handleLogout} /><main className="flex-grow"><AdminLoginPage onLogin={handleLogin} /></main><Footer /></>} />
 
               {/* Admin Routes with Sidebar Layout */}
@@ -106,6 +116,10 @@ export default function App() {
                 <Route path="tasks" element={<AdminTaskBoardPage user={user} />} />
                 <Route path="users" element={<AdminUsersPage user={user} />} />
                 <Route path="inquiries" element={<AdminInquiriesPage user={user} />} />
+                <Route path="resources" element={<AdminResourcesPage />} />
+                <Route path="hotlines" element={<AdminHotlinePage />} />
+                <Route path="settings" element={<AdminSettingsPage />} />
+                <Route path="audit" element={<AdminAuditLogsPage />} />
                 <Route path="profile" element={<AdminProfilePage user={user} />} />
               </Route>
             </Routes>

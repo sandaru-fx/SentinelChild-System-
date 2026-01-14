@@ -13,8 +13,10 @@ export const Navbar = ({ user, onLogout }: { user: Admin | null; onLogout: () =>
     { name: t('home'), path: '/' },
     { name: t('submitReport'), path: '/report' },
     { name: t('checkStatus'), path: '/status' },
+    { name: t('resources'), path: '/resources' },
     { name: t('about'), path: '/about' },
     { name: t('contact'), path: '/contact' },
+    { name: t('emergency'), path: '/emergency' },
   ];
 
   return (
@@ -74,6 +76,13 @@ export const Navbar = ({ user, onLogout }: { user: Admin | null; onLogout: () =>
                   }`}
               >
                 සිං
+              </button>
+              <button
+                onClick={() => setLanguage('ta')}
+                className={`px-3 py-1.5 text-[10px] font-bold uppercase rounded-md transition-all ${language === 'ta' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                  }`}
+              >
+                தமிழ்
               </button>
             </div>
 

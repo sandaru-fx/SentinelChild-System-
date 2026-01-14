@@ -72,8 +72,8 @@ func StartChatSession(client *mongo.Client) http.HandlerFunc {
 			greeting := models.ChatMessage{
 				ID:         fmt.Sprintf("BOT-%d", now.Unix()),
 				SenderID:   "bot",
-				SenderName: "CHARS SafeGuard",
-				Text:       fmt.Sprintf("Pin sidda wenawa %s machan meyata sambanda unata. Api okkoma ekathu wela me loka wala inna innocent childrenwa save karagamu. Kohomada ada mawa help karanna puluwan?", req.UserName),
+				SenderName: "CHARS Comfort Bot",
+				Text:       fmt.Sprintf("Hela-suwa machan %s. Breathe normally. You are in a safe space now. Api okkoma ekathu wela oyawa safe karagamu. Tell me what happened when you are ready. I am here to listen.", req.UserName),
 				Timestamp:  now,
 				Status:     "DELIVERED",
 			}

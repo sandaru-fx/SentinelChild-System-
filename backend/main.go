@@ -57,6 +57,15 @@ func main() {
 	// Voice/Text Inquiries (Public)
 	r.HandleFunc("/inquiries", controllers.CreateInquiry(client)).Methods(http.MethodPost)
 
+	// Educational Hub (Public)
+	r.HandleFunc("/resources", controllers.GetResources(client)).Methods(http.MethodGet)
+
+	// Emergency Contacts (Public)
+	r.HandleFunc("/hotlines", controllers.GetHotlines(client)).Methods(http.MethodGet)
+
+	// Site Settings/Policies (Public)
+	r.HandleFunc("/settings/{key}", controllers.GetSetting(client)).Methods(http.MethodGet)
+
 	// Serve Static Files (Audio Uploads)
 	r.PathPrefix("/uploads/").Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("./uploads/"))))
 
@@ -83,6 +92,23 @@ func main() {
 	admin.HandleFunc("/personnel/{id}", controllers.UpdateAdmin(client)).Methods(http.MethodPatch)
 	admin.HandleFunc("/personnel/{id}", controllers.DeleteAdmin(client)).Methods(http.MethodDelete)
 	admin.HandleFunc("/logs", controllers.GetAuditLogs(client)).Methods(http.MethodGet)
+
+	// Admin Educational Hub Management
+	admin.HandleFunc("/resources", controllers.CreateResource(client)).Methods(http.MethodPost)
+	admin.HandleFunc("/resources/{id}", controllers.UpdateResource(client)).Methods(http.MethodPatch)
+	admin.HandleFunc("/resources/{id}", controllers.DeleteResource(client)).Methods(http.MethodDelete)
+
+	// Admin Emergency Hotline Management
+	admin.HandleFunc("/hotlines", controllers.CreateHotline(client)).Methods(http.MethodPost)
+	admin.HandleFunc("/hotlines/{id}", controllers.UpdateHotline(client)).Methods(http.MethodPatch)
+	admin.HandleFunc("/hotlines/{id}", controllers.DeleteHotline(client)).Methods(http.MethodDelete)
+
+	// Admin Settings Management
+	admin.HandleFunc("/settings/{key}", controllers.UpdateSetting(client)).Methods(http.MethodPost)
+
+	// Admin Audit & Workflow
+	admin.HandleFunc("/audit-logs", controllers.GetAuditLogs(client)).Methods(http.MethodGet)
+	admin.HandleFunc("/reports/{id}/internal-notes", controllers.AddInternalNote(client)).Methods(http.MethodPost)
 
 	// Add CORS support
 	c := cors.New(cors.Options{

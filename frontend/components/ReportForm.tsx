@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { useTranslation } from '../context/LanguageContext';
-import { GeminiLiveAssistant } from '../services/geminiService';
+import { GeminiLiveAssistant, analyzeUrgency } from '../services/geminiService';
 
 interface FormErrors {
   reporterName?: string;
@@ -131,6 +131,10 @@ export default function ReportForm() {
 
     setLoading(true);
     try {
+      // AI Triage
+      const priority = await analyzeUrgency(formData.description);
+      console.log('⚖️ AI Triage Result:', priority);
+
       const result = await api.submitReport({
         description: `[ENV: ${formData.locationType}] [LOC: ${formData.locationText}] ${formData.description}`,
         childName: formData.childName,
@@ -139,7 +143,8 @@ export default function ReportForm() {
           name: formData.reporterName,
           phone: formData.reporterPhone
         },
-        evidence: formData.evidence
+        evidence: formData.evidence,
+        priority: priority
       });
 
       if (result.success) {

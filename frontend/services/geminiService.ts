@@ -1,6 +1,8 @@
 
 import { GoogleGenAI, LiveServerMessage, Modality, Blob } from '@google/genai';
 
+const genAI = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY || '' });
+
 // Custom decoding function as per guidelines
 export const decodeBase64 = (base64: string) => {
   const binaryString = atob(base64);
@@ -52,8 +54,8 @@ export class GeminiLiveAssistant {
   private stream: MediaStream | null = null;
 
   async start(onTranscription: (text: string, isUser: boolean) => void) {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    
+    const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY });
+
     this.inputAudioContext = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
     this.outputAudioContext = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
     this.outputNode = this.outputAudioContext.createGain();
@@ -159,3 +161,27 @@ export class GeminiLiveAssistant {
     };
   }
 }
+
+export const analyzeUrgency = async (text: string): Promise<'LOW' | 'MEDIUM' | 'HIGH'> => {
+  try {
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const prompt = `Analyze the following report description for a child protection portal and determine the urgency level. 
+    Output ONLY one of the following words: LOW, MEDIUM, HIGH.
+    - HIGH: Immediate danger, sexual abuse, life-threatening situation, suspect currently with child.
+    - MEDIUM: Ongoing neglect, historical abuse, suspicious activity.
+    - LOW: General inquiries, non-dangerous situations.
+    
+    Report: "${text}"`;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const level = response.text().trim().toUpperCase();
+
+    if (level.includes('HIGH')) return 'HIGH';
+    if (level.includes('MEDIUM')) return 'MEDIUM';
+    return 'LOW';
+  } catch (error) {
+    console.error('AI Triage Error:', error);
+    return 'MEDIUM'; // Default to medium on error for safety
+  }
+};

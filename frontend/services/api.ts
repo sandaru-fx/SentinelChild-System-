@@ -1,7 +1,8 @@
 
-import { Report, ReportStatus, Admin, AuditLog, ChatSession, ChatMessage } from '../types';
+import { Report, ReportStatus, Admin, AuditLog, ChatSession, ChatMessage, Resource, Hotline, Setting } from '../types';
 import { mockApi } from './mockApi';
 
+// @ts-ignore
 const N8N_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080';
 const isDemo = () => false; // Disable demo mode since we are using the live backend
 
@@ -16,7 +17,8 @@ export const api = {
       });
       return await response.json();
     } catch (error) {
-      return mockApi.submitReport(data);
+      console.error('API submitReport Error:', error);
+      throw error;
     }
   },
 
@@ -40,11 +42,11 @@ export const api = {
           id: 'demo_admin',
           email: 'admin@chars.gov',
           name: 'Officer Sarah',
-          role: 'super_admin',
-          avatar_url: 'https://ui-avatars.com/api/?name=Sarah+Officer&background=0D8ABC&color=fff',
+          role: 'super admin' as any,
+          avatar: 'https://ui-avatars.com/api/?name=Sarah+Officer&background=0D8ABC&color=fff',
           permissions: ['all'],
           last_active: new Date().toISOString()
-        }
+        } as any
       };
     }
     try {
@@ -71,20 +73,37 @@ export const api = {
     }
   },
 
-  updateReportStatus: async (id: string, status: ReportStatus, notes: string, token: string): Promise<boolean> => {
-    if (isDemo()) return mockApi.updateReportStatus(id, status, notes);
+  updateReport: async (id: string, status: string, notes: string, priority: string, token: string): Promise<boolean> => {
     try {
-      const response = await fetch(`${N8N_BASE_URL}/admin/update-report`, {
+      const response = await fetch(`${N8N_BASE_URL}/admin/reports/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ id, status, notes }),
+        body: JSON.stringify({ id, status, notes, priority }),
       });
       return response.ok;
     } catch (error) {
-      return mockApi.updateReportStatus(id, status, notes);
+      console.error('API updateReport Error:', error);
+      return false;
+    }
+  },
+
+  addInternalNote: async (reportId: string, text: string, token: string): Promise<boolean> => {
+    try {
+      const response = await fetch(`${N8N_BASE_URL}/admin/reports/${reportId}/internal-notes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ text }),
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('API addInternalNote Error:', error);
+      return false;
     }
   },
 
@@ -105,17 +124,16 @@ export const api = {
     }
   },
 
-  getAuditLogs: async (token: string): Promise<AuditLog[]> => {
-    if (isDemo()) return mockApi.getAuditLogs(token);
+  getAuditLogs: async (token: string, targetId?: string): Promise<AuditLog[]> => {
     try {
-      const response = await fetch(`${N8N_BASE_URL}/admin/logs`, {
+      const url = targetId ? `${N8N_BASE_URL}/admin/audit-logs?targetId=${targetId}` : `${N8N_BASE_URL}/admin/audit-logs`;
+      const response = await fetch(url, {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       return await response.json();
     } catch (error) {
-      return [
-        { id: 'l1', adminId: '1', action: 'System Login', timestamp: new Date().toISOString(), reportId: 'N/A', details: 'Authorized session established' }
-      ];
+      console.error('API getAuditLogs Error:', error);
+      return [];
     }
   },
 
@@ -257,6 +275,152 @@ export const api = {
       return response.ok;
     } catch (error) {
       console.error('API deleteInquiry Error:', error);
+      return false;
+    }
+  },
+
+  // EDUCATIONAL HUB (RESOURCES) API
+  getResources: async (lang?: string): Promise<Resource[]> => {
+    try {
+      const url = lang ? `${N8N_BASE_URL}/resources?lang=${lang}` : `${N8N_BASE_URL}/resources`;
+      const response = await fetch(url);
+      return await response.json();
+    } catch (error) {
+      console.error('API getResources Error:', error);
+      return [];
+    }
+  },
+
+  createResource: async (resource: Partial<Resource>, token: string): Promise<Resource | null> => {
+    try {
+      const response = await fetch(`${N8N_BASE_URL}/admin/resources`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(resource),
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('API createResource Error:', error);
+      return null;
+    }
+  },
+
+  updateResource: async (id: string, updates: Partial<Resource>, token: string): Promise<Resource | null> => {
+    try {
+      const response = await fetch(`${N8N_BASE_URL}/admin/resources/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(updates),
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('API updateResource Error:', error);
+      return null;
+    }
+  },
+
+  deleteResource: async (id: string, token: string): Promise<boolean> => {
+    try {
+      const response = await fetch(`${N8N_BASE_URL}/admin/resources/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('API deleteResource Error:', error);
+      return false;
+    }
+  },
+
+  // EMERGENCY HOTLINES API
+  getHotlines: async (lang?: string): Promise<Hotline[]> => {
+    try {
+      const url = lang ? `${N8N_BASE_URL}/hotlines?lang=${lang}` : `${N8N_BASE_URL}/hotlines`;
+      const response = await fetch(url);
+      return await response.json();
+    } catch (error) {
+      console.error('API getHotlines Error:', error);
+      return [];
+    }
+  },
+
+  createHotline: async (hotline: Partial<Hotline>, token: string): Promise<Hotline | null> => {
+    try {
+      const response = await fetch(`${N8N_BASE_URL}/admin/hotlines`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(hotline),
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('API createHotline Error:', error);
+      return null;
+    }
+  },
+
+  updateHotline: async (id: string, updates: Partial<Hotline>, token: string): Promise<Hotline | null> => {
+    try {
+      const response = await fetch(`${N8N_BASE_URL}/admin/hotlines/${id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(updates),
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('API updateHotline Error:', error);
+      return null;
+    }
+  },
+
+  deleteHotline: async (id: string, token: string): Promise<boolean> => {
+    try {
+      const response = await fetch(`${N8N_BASE_URL}/admin/hotlines/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('API deleteHotline Error:', error);
+      return false;
+    }
+  },
+
+  // SETTINGS / POLICIES API
+  getSetting: async (key: string, lang: string = 'en'): Promise<Setting | null> => {
+    try {
+      const response = await fetch(`${N8N_BASE_URL}/settings/${key}?lang=${lang}`);
+      return await response.json();
+    } catch (error) {
+      console.error('API getSetting Error:', error);
+      return null;
+    }
+  },
+
+  updateSetting: async (key: string, value: string, lang: string = 'en', token: string): Promise<boolean> => {
+    try {
+      const response = await fetch(`${N8N_BASE_URL}/admin/settings/${key}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ value, language: lang }),
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('API updateSetting Error:', error);
       return false;
     }
   }
