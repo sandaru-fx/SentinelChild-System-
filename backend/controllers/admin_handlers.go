@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
-	"time"
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
@@ -85,28 +84,5 @@ func DeleteAdmin(client *mongo.Client) http.HandlerFunc {
 			return
 		}
 		w.WriteHeader(http.StatusOK)
-	}
-}
-
-// GetAuditLogs returns system activity (Simplified for demo).
-func GetAuditLogs(client *mongo.Client) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		logs := []map[string]interface{}{
-			{
-				"id":        "l1",
-				"action":    "System Authentication",
-				"details":   "Secure terminal session established",
-				"reportId":  "N/A",
-				"timestamp": time.Now().Add(-2 * time.Hour),
-			},
-			{
-				"id":        "l2",
-				"action":    "Database Sync",
-				"details":   "Master report index synchronized",
-				"reportId":  "CH-102933",
-				"timestamp": time.Now().Add(-5 * time.Hour),
-			},
-		}
-		json.NewEncoder(w).Encode(logs)
 	}
 }
