@@ -64,7 +64,8 @@ export default function StatusTracker() {
         <h1 className="text-4xl font-black text-slate-900 dark:text-white mb-4 transition-colors">{t('trackProgress')}</h1>
       </div>
 
-      <div className="bg-white dark:bg-slate-900/40 p-10 rounded-[2.5rem] shadow-2xl border border-slate-100 dark:border-slate-800 backdrop-blur-md transition-colors">
+      <div className="bg-white dark:bg-slate-900/40 p-10 rounded-[2.5rem] shadow-2xl border-2 border-slate-100 dark:border-slate-800 backdrop-blur-md transition-all duration-500 group relative overflow-hidden
+                      hover:border-indigo-400/50 dark:hover:border-indigo-500/50 hover:bg-indigo-50/20 dark:hover:bg-indigo-900/10 hover:shadow-indigo-500/10">
         <form onSubmit={handleSearch} className="flex flex-col gap-4 mb-10">
           <label className="text-xs font-black text-slate-400 uppercase tracking-widest ml-1">{t('enterId')}</label>
           <div className="flex flex-col sm:flex-row gap-3">

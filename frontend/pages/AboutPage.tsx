@@ -32,12 +32,17 @@ export default function AboutPage() {
               { step: '03', title: 'Verification', desc: 'Authorized law enforcement units verify digital evidence and cross-reference with existing records.' },
               { step: '04', title: 'Intervention', desc: 'Rapid field response and legal intervention based on verified real-time digital briefs.' }
             ].map((item, i) => (
-              <div key={i} className="flex gap-8 group cursor-default p-8 bg-white dark:bg-slate-900/40 rounded-[2.5rem] border-2 border-slate-50 dark:border-slate-800 hover:border-blue-600 dark:hover:border-blue-500 hover:ring-4 hover:ring-blue-600/20 dark:hover:ring-blue-500/10 hover:ring-offset-4 dark:hover:ring-offset-slate-950 hover:-translate-y-2 transition-all duration-500 shadow-sm dark:shadow-none">
-                <span className="text-5xl font-black text-blue-100 dark:text-slate-800 italic group-hover:text-blue-600 dark:group-hover:text-blue-500 transition-colors duration-500 shrink-0">{item.step}</span>
+              <div key={i} className="flex gap-8 group cursor-default p-8 bg-white dark:bg-slate-900/40 rounded-[2.8rem] border-2 border-slate-100 dark:border-slate-800 
+                                     hover:bg-indigo-50/50 dark:hover:bg-indigo-900/10 
+                                     hover:border-indigo-400/50 dark:hover:border-indigo-500/50
+                                     hover:-translate-y-2 transition-all duration-500 shadow-sm dark:shadow-none relative overflow-hidden">
+                <span className="text-5xl font-black text-blue-100 dark:text-slate-800 italic group-hover:text-indigo-600 dark:group-hover:text-indigo-500 transition-colors duration-500 shrink-0">{item.step}</span>
                 <div className="space-y-1 pt-1">
-                  <h4 className="text-lg font-black text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-500 transition-colors">{item.title}</h4>
+                  <h4 className="text-lg font-black text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-500 transition-colors">{item.title}</h4>
                   <p className="text-slate-600 dark:text-slate-400 font-medium text-sm leading-relaxed">{item.desc}</p>
                 </div>
+                {/* Interactive Indigo Glow Line */}
+                <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-indigo-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity blur-sm"></div>
               </div>
             ))}
           </div>

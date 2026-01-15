@@ -10,13 +10,20 @@ const GlassCard = ({ icon, title, desc, delay }: { icon: string, title: string, 
     whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
     transition={{ delay, duration: 0.5 }}
-    className="backdrop-blur-2xl bg-white/40 dark:bg-slate-900/40 border border-white/40 dark:border-white/10 p-8 rounded-[2.5rem] hover:bg-white/60 dark:hover:bg-slate-800/60 transition-all group cursor-default shadow-2xl shadow-blue-900/5 ring-1 ring-white/20"
+    className="backdrop-blur-2xl bg-white/40 dark:bg-slate-900/40 border-2 border-slate-200 dark:border-white/10 p-8 rounded-[2.5rem] 
+               hover:bg-blue-50/80 dark:hover:bg-amber-950/20 
+               hover:border-blue-400 dark:hover:border-amber-500
+               transition-all duration-500 group cursor-default shadow-2xl shadow-blue-900/5 hover:shadow-blue-500/30 dark:hover:shadow-amber-600/30 
+               ring-1 ring-white/20 hover:-translate-y-2"
   >
     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 dark:from-blue-500/20 dark:to-indigo-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-inner">
-      <i className={`fas ${icon} text-blue-600 dark:text-blue-400 text-2xl`}></i>
+      <i className={`fas ${icon} text-blue-600 dark:text-blue-400 text-2xl group-hover:text-blue-700 dark:group-hover:text-amber-500 transition-colors`}></i>
     </div>
-    <h3 className="text-slate-900 dark:text-white font-black text-xl mb-3 tracking-tight">{title}</h3>
-    <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed font-medium">{desc}</p>
+    <h3 className="text-slate-900 dark:text-white font-black text-xl mb-3 tracking-tight group-hover:text-blue-800 dark:group-hover:text-amber-400 transition-colors">{title}</h3>
+    <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed font-medium group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">{desc}</p>
+
+    {/* Interactive Glow Effect for the Frame */}
+    <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-blue-400 to-transparent dark:via-amber-500 opacity-0 group-hover:opacity-100 transition-opacity blur-sm"></div>
   </motion.div>
 );
 
@@ -64,10 +71,10 @@ export default function LandingPage() {
                 transition={{ delay: 0.1 }}
                 className="text-5xl sm:text-7xl lg:text-[85px] font-black leading-tight tracking-tighter text-slate-900 dark:text-white"
               >
-                The Future <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400 drop-shadow-sm">Is Safe.</span>
-                <div className="text-3xl sm:text-4xl lg:text-[45px] mt-2 opacity-90 leading-tight">
-                  <span className="text-slate-400 dark:text-slate-500 font-black italic">Your Voice, </span>
-                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 font-black">Their Shield.</span>
+                The Future <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-600 dark:from-blue-400 dark:via-indigo-400 dark:to-blue-400 drop-shadow-sm">Is Safe.</span>
+                <div className="text-3xl sm:text-4xl lg:text-[45px] mt-2 leading-tight">
+                  <span className="text-slate-600 dark:text-slate-400 font-black italic">Your Voice, </span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-blue-600 dark:from-indigo-400 dark:to-blue-400 font-black">Their Shield.</span>
                 </div>
               </motion.h1>
 
@@ -165,9 +172,9 @@ export default function LandingPage() {
           <div className="text-center mb-20 space-y-4">
             <span className="text-blue-600 dark:text-blue-400 font-black uppercase tracking-[0.3em] text-[10px] block">Global Standard Security</span>
             <h2 className="text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tighter italic">
-              Built for <span className="text-slate-300 dark:text-slate-700">Speed & Absolute Privacy.</span>
+              Built for <span className="text-slate-400 dark:text-slate-600">Speed & Absolute Privacy.</span>
             </h2>
-            <div className="w-24 h-2 bg-gradient-to-r from-blue-600 to-indigo-600 mx-auto rounded-full"></div>
+            <div className="w-24 h-1.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-600 mx-auto rounded-full shadow-lg shadow-blue-500/20"></div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

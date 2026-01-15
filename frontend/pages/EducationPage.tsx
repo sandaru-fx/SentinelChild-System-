@@ -11,11 +11,14 @@ const EducationCard = ({ resource, delay }: { resource: Resource, delay: number 
         viewport={{ once: true }}
         transition={{ delay }}
         onClick={() => resource.link && window.open(resource.link, '_blank')}
-        className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[2rem] overflow-hidden group hover:shadow-2xl hover:shadow-blue-500/10 transition-all cursor-pointer h-full flex flex-col"
+        className="backdrop-blur-2xl bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 rounded-[2.2rem] overflow-hidden group 
+                   hover:bg-blue-50/50 dark:hover:bg-blue-900/10 
+                   hover:border-blue-400/50 dark:hover:border-blue-500/50
+                   hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-500 cursor-pointer h-full flex flex-col relative"
     >
         <div className="h-48 bg-slate-100 dark:bg-slate-800 flex items-center justify-center relative group-hover:bg-blue-600 transition-colors shrink-0">
             <i className={`fas ${resource.type === 'VIDEO' ? 'fa-play-circle' :
-                    resource.type === 'GUIDE' ? 'fa-book-open' : 'fa-file-alt'
+                resource.type === 'GUIDE' ? 'fa-book-open' : 'fa-file-alt'
                 } text-4xl text-slate-300 group-hover:text-white transition-colors`}></i>
             <div className="absolute top-4 right-4 px-3 py-1 bg-white/50 backdrop-blur-md rounded-full text-[8px] font-black uppercase tracking-widest text-slate-900">
                 {resource.type}
@@ -33,6 +36,8 @@ const EducationCard = ({ resource, delay }: { resource: Resource, delay: number 
                 <i className="fas fa-arrow-right-long group-hover:translate-x-2 transition-transform"></i>
             </div>
         </div>
+        {/* Interactive Blue Glow Line */}
+        <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity blur-sm"></div>
     </motion.div>
 );
 

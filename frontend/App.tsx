@@ -112,7 +112,7 @@ export default function App() {
                 <Route path="dashboard" element={<AdminDashboardPage user={user} />} />
                 <Route path="cases" element={<AdminCasesPage user={user} />} />
                 <Route path="chat" element={<AdminChatPage user={user} />} />
-                <Route path="analytics" element={<AdminAnalyticsPage />} />
+                <Route path="analytics" element={<AdminAnalyticsPage user={user} />} />
                 <Route path="tasks" element={<AdminTaskBoardPage user={user} />} />
                 <Route path="users" element={<AdminUsersPage user={user} />} />
                 <Route path="inquiries" element={<AdminInquiriesPage user={user} />} />

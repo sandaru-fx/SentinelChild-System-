@@ -5,12 +5,20 @@ import { StatusBadge } from '../components/StatusBadge';
 import { GoogleGenAI } from "@google/genai";
 import { AnimatePresence } from 'framer-motion';
 import EvidenceLocker from '../components/EvidenceLocker';
+import { AdminDataTable } from '../components/admin/AdminDataTable';
+import { SLACountdown } from '../components/admin/SLACountdown';
 
 export default function AdminCasesPage({ user }: { user: Admin | null }) {
     const [viewMode, setViewMode] = useState<'CASES' | 'INQUIRIES'>('CASES');
 
-    // Reports State
+    // Reports State (Server-side)
     const [reports, setReports] = useState<Report[]>([]);
+    const [totalReports, setTotalReports] = useState(0);
+    const [page, setPage] = useState(1);
+    const [limit] = useState(20);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedReportIds, setSelectedReportIds] = useState<string[]>([]);
+
     const [selectedReport, setSelectedReport] = useState<Report | null>(null);
     const [filter, setFilter] = useState<ReportStatus | 'ALL'>('ALL');
 
@@ -20,7 +28,6 @@ export default function AdminCasesPage({ user }: { user: Admin | null }) {
 
     // Common State
     const [loading, setLoading] = useState(true);
-    const [search, setSearch] = useState('');
     const [updating, setUpdating] = useState(false);
 
     const [editingStatus, setEditingStatus] = useState<ReportStatus | null>(null);
@@ -36,19 +43,36 @@ export default function AdminCasesPage({ user }: { user: Admin | null }) {
         if (user?.token) {
             fetchData();
         }
-    }, [user]);
+    }, [user, page, searchQuery, filter]); // Added dependencies for server-side search/pagination
 
     const fetchData = async () => {
         if (!user?.token) return;
         setLoading(true);
-        const [reportsData, inquiriesData] = await Promise.all([
-            api.getAllReports(user.token),
-            api.getInquiries(user.token)
-        ]);
+        try {
+            const [reportsResponse, inquiriesData] = await Promise.all([
+                api.getAllReports(user.token, searchQuery, page, limit),
+                api.getInquiries(user.token)
+            ]);
 
-        setReports(reportsData.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
-        setInquiries((inquiriesData || []).filter(i => !i.is_voice).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
-        setLoading(false);
+            setReports(reportsResponse.data);
+            setTotalReports(reportsResponse.total);
+            setInquiries((inquiriesData || []).filter(i => !i.is_voice).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()));
+        } catch (error) {
+            console.error("Fetch data error:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleBulkUpdate = async (status: ReportStatus, priority: string) => {
+        if (!user?.token || selectedReportIds.length === 0) return;
+        setUpdating(true);
+        const success = await api.bulkUpdateReports(selectedReportIds, status, priority, "Bulk updated by admin", user.token);
+        if (success) {
+            setSelectedReportIds([]);
+            await fetchData();
+        }
+        setUpdating(false);
     };
 
     const handleUpdateReport = async () => {
@@ -115,29 +139,56 @@ export default function AdminCasesPage({ user }: { user: Admin | null }) {
         }
     };
 
-    const filteredReports = reports.filter(report => {
-        const matchesFilter = filter === 'ALL' || report.status === filter;
-        const matchesSearch =
-            report.id.toLowerCase().includes(search.toLowerCase()) ||
-            (report.description || '').toLowerCase().includes(search.toLowerCase()) ||
-            (report.childName || '').toLowerCase().includes(search.toLowerCase());
-        return matchesFilter && matchesSearch;
-    });
+    const caseColumns = [
+        {
+            header: 'Subject',
+            accessor: (item: Report) => (
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center text-xs font-black">
+                        {item.childName ? item.childName.charAt(0).toUpperCase() : '#'}
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                        <span className="font-bold text-xs truncate max-w-[120px]">{item.childName || 'Anonymized'}</span>
+                        <span className="text-[9px] text-slate-400 font-mono">ID: {item.id.slice(0, 8)}</span>
+                    </div>
+                </div>
+            )
+        },
+        {
+            header: 'SLA/Time',
+            accessor: (item: Report) => (
+                <div className="flex flex-col gap-1">
+                    <SLACountdown createdAt={item.createdAt} />
+                    <span className="text-[9px] text-slate-400">{new Date(item.createdAt).toLocaleDateString()}</span>
+                </div>
+            )
+        },
+        {
+            header: 'Visuals',
+            accessor: (item: Report) => (
+                <div className="flex gap-1">
+                    <StatusBadge status={item.status} />
+                    {item.priority === 'HIGH' && (
+                        <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse mt-1.5" title="High Priority"></span>
+                    )}
+                </div>
+            )
+        }
+    ];
 
     const filteredInquiries = inquiries.filter(inq =>
-        inq.name?.toLowerCase().includes(search.toLowerCase()) ||
-        inq.email?.toLowerCase().includes(search.toLowerCase()) ||
-        inq.department?.toLowerCase().includes(search.toLowerCase())
+        inq.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        inq.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        inq.department?.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    if (loading) return <div className="p-12 text-center text-slate-400">Loading data...</div>;
+    if (loading && page === 1 && searchQuery === '') return <div className="p-12 text-center text-slate-400">Loading Intelligence...</div>;
 
     return (
         <div className="h-[calc(100vh-8rem)] grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* List Sidebar */}
-            <div className="lg:col-span-4 flex flex-col bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] shadow-sm overflow-hidden h-full">
+            {/* Main Content Area (Table + Detail) */}
+            <div className="lg:col-span-12 xl:col-span-4 flex flex-col bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] shadow-sm overflow-hidden h-full">
                 <div className="p-4 border-b border-[var(--color-border)] space-y-4 bg-[var(--color-surface)] z-10">
-
                     {/* Modern Glass View Switcher */}
                     <div className="flex bg-[var(--color-bg)] p-1 rounded-xl border border-[var(--color-border)] overflow-hidden relative">
                         <button
@@ -154,79 +205,56 @@ export default function AdminCasesPage({ user }: { user: Admin | null }) {
                         </button>
                     </div>
 
-                    <div className="flex items-center gap-2 relative">
-                        <i className="fas fa-search absolute left-3 text-[var(--color-text-secondary)] text-sm"></i>
-                        <input
-                            type="text"
-                            placeholder={viewMode === 'CASES' ? "Search by name or ID..." : "Search by name, email..."}
-                            value={search}
-                            onChange={e => setSearch(e.target.value)}
-                            className="w-full pl-9 pr-4 py-2.5 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-[var(--color-text-secondary)]/50"
-                        />
-                        {viewMode === 'CASES' && (
-                            <button
-                                onClick={() => import('../utils/export').then(mod => mod.exportToCSV(filteredReports, 'case_files'))}
-                                className="p-2.5 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl text-[var(--color-text-secondary)] hover:text-blue-600 hover:border-blue-500 transition-all font-medium"
-                                title="Export CSV"
-                            >
-                                <i className="fas fa-file-csv"></i>
-                            </button>
-                        )}
-                    </div>
-
-                    {viewMode === 'CASES' && (
-                        <div className="relative">
-                            <i className="fas fa-filter absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)] text-xs"></i>
-                            <select
-                                value={filter}
-                                onChange={(e) => setFilter(e.target.value as any)}
-                                className="w-full pl-9 pr-4 py-2.5 bg-[var(--color-bg)] border border-[var(--color-border)] rounded-xl text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all appearance-none cursor-pointer text-[var(--color-text-primary)]"
-                            >
-                                <option value="ALL">All Statuses</option>
-                                {Object.values(ReportStatus).map(s => (
-                                    <option key={s} value={s}>{s}</option>
-                                ))}
-                            </select>
-                            <i className="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)] text-xs pointer-events-none"></i>
+                    {/* Bulk Actions Bar */}
+                    {viewMode === 'CASES' && selectedReportIds.length > 0 && (
+                        <div className="flex items-center justify-between p-3 bg-blue-600 rounded-xl text-white animate-in slide-in-from-top duration-300">
+                            <span className="text-[10px] font-black uppercase tracking-widest">{selectedReportIds.length} Selected</span>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => handleBulkUpdate(ReportStatus.INVESTIGATING, 'HIGH')}
+                                    className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors"
+                                >
+                                    Escalate
+                                </button>
+                                <button
+                                    onClick={() => handleBulkUpdate(ReportStatus.RESOLVED, 'MEDIUM')}
+                                    className="px-3 py-1 bg-white/20 hover:bg-white/30 rounded-lg text-[9px] font-black uppercase tracking-widest transition-colors"
+                                >
+                                    Resolve
+                                </button>
+                                <button
+                                    onClick={() => setSelectedReportIds([])}
+                                    className="px-2 py-1 bg-black/20 hover:bg-black/30 rounded-lg text-[9px] transition-colors"
+                                >
+                                    <i className="fas fa-times"></i>
+                                </button>
+                            </div>
                         </div>
                     )}
                 </div>
 
-                <div className="flex-grow overflow-y-auto">
+                <div className="flex-grow overflow-y-auto custom-scrollbar p-2">
                     {viewMode === 'CASES' ? (
-                        <div className="divide-y divide-[var(--color-border)]">
-                            {filteredReports.map(report => (
-                                <button
-                                    key={report.id}
-                                    onClick={() => {
-                                        setSelectedReport(report);
-                                        setEditingStatus(report.status);
-                                        setEditingNotes(report.adminNotes || '');
-                                        setEditingPriority(report.priority || 'MEDIUM');
-                                        setAiSummary(null);
-                                    }}
-                                    className={`w-full text-left p-4 hover:bg-[var(--color-bg)] transition-all group ${selectedReport?.id === report.id ? 'bg-blue-50 dark:bg-blue-900/10' : ''} `}
-                                >
-                                    <div className="flex items-start gap-4">
-                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-sm font-bold ${selectedReport?.id === report.id ? 'bg-blue-200 text-blue-700 dark:bg-blue-800 dark:text-blue-200' : 'bg-[var(--color-bg)] text-[var(--color-text-secondary)] group-hover:bg-blue-100 group-hover:text-blue-600 dark:group-hover:bg-blue-900/40'} `}>
-                                            {report.childName ? report.childName.charAt(0).toUpperCase() : '#'}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex justify-between items-center mb-1">
-                                                <h4 className={`font-semibold text-sm truncate ${selectedReport?.id === report.id ? 'text-blue-700 dark:text-blue-300' : 'text-[var(--color-text-primary)]'} `}>
-                                                    {report.childName || "Anonymized Subject"}
-                                                </h4>
-                                                <span className="text-[10px] text-[var(--color-text-secondary)] shrink-0">{new Date(report.createdAt).toLocaleDateString()}</span>
-                                            </div>
-                                            <div className="flex items-center gap-2 mb-1.5">
-                                                <span className="text-[10px] font-mono text-[var(--color-text-secondary)]">ID: {report.id.slice(0, 8)}</span>
-                                            </div>
-                                            <StatusBadge status={report.status} />
-                                        </div>
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
+                        <AdminDataTable
+                            data={reports}
+                            columns={caseColumns}
+                            keyField="id"
+                            onRowClick={(item: Report) => {
+                                setSelectedReport(item);
+                                setEditingStatus(item.status);
+                                setEditingNotes(item.adminNotes || '');
+                                setEditingPriority(item.priority || 'MEDIUM');
+                                setAiSummary(null);
+                            }}
+                            isLoading={loading}
+                            totalItems={totalReports}
+                            currentPage={page}
+                            itemsPerPage={limit}
+                            onPageChange={(p) => setPage(p)}
+                            onSearch={(q) => setSearchQuery(q)}
+                            selectedIds={selectedReportIds}
+                            onSelectionChange={(ids) => setSelectedReportIds(ids)}
+                        />
                     ) : (
                         <div className="divide-y divide-[var(--color-border)]">
                             {filteredInquiries.map(inq => (
@@ -262,7 +290,7 @@ export default function AdminCasesPage({ user }: { user: Admin | null }) {
             </div>
 
             {/* Detail View */}
-            <div className="lg:col-span-8 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] shadow-sm overflow-hidden flex flex-col">
+            <div className="lg:col-span-12 xl:col-span-8 bg-[var(--color-surface)] rounded-xl border border-[var(--color-border)] shadow-sm overflow-hidden flex flex-col">
                 {viewMode === 'CASES' ? (
                     selectedReport ? (
                         <>
@@ -274,8 +302,8 @@ export default function AdminCasesPage({ user }: { user: Admin | null }) {
                                         <div className="flex items-center gap-2">
                                             <StatusBadge status={selectedReport.status} size="lg" />
                                             <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${selectedReport.priority === 'HIGH' ? 'bg-rose-100 text-rose-600 border border-rose-200' :
-                                                    selectedReport.priority === 'MEDIUM' ? 'bg-amber-100 text-amber-600 border border-amber-200' :
-                                                        'bg-blue-100 text-blue-600 border border-blue-200'
+                                                selectedReport.priority === 'MEDIUM' ? 'bg-amber-100 text-amber-600 border border-amber-200' :
+                                                    'bg-blue-100 text-blue-600 border border-blue-200'
                                                 } `}>
                                                 {selectedReport.priority || 'MEDIUM'}
                                             </span>
@@ -303,8 +331,8 @@ export default function AdminCasesPage({ user }: { user: Admin | null }) {
                                         key={tab}
                                         onClick={() => setActiveDetailTab(tab)}
                                         className={`px-6 py-3 text-[10px] font-black uppercase tracking-widest transition-all border-b-2 ${activeDetailTab === tab
-                                                ? 'border-blue-600 text-blue-600'
-                                                : 'border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
+                                            ? 'border-blue-600 text-blue-600'
+                                            : 'border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
                                             } `}
                                     >
                                         {tab}

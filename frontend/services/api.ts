@@ -61,15 +61,38 @@ export const api = {
     }
   },
 
-  getAllReports: async (token: string): Promise<Report[]> => {
-    if (isDemo()) return mockApi.getAllReports();
+  getAllReports: async (token: string, q?: string, page: number = 1, limit: number = 20): Promise<{ data: Report[]; total: number; page: number; limit: number }> => {
+    if (isDemo()) return { data: await mockApi.getAllReports(), total: 100, page: 1, limit: 20 };
     try {
-      const response = await fetch(`${N8N_BASE_URL}/admin/reports`, {
+      const url = new URL(`${N8N_BASE_URL}/admin/reports`);
+      if (q) url.searchParams.append('q', q);
+      url.searchParams.append('page', page.toString());
+      url.searchParams.append('limit', limit.toString());
+
+      const response = await fetch(url.toString(), {
         headers: { 'Authorization': `Bearer ${token}` },
       });
       return await response.json();
     } catch (error) {
-      return mockApi.getAllReports();
+      const mockData = await mockApi.getAllReports();
+      return { data: mockData, total: mockData.length, page: 1, limit: 20 };
+    }
+  },
+
+  bulkUpdateReports: async (ids: string[], status: string, priority: string, note: string, token: string): Promise<boolean> => {
+    try {
+      const response = await fetch(`${N8N_BASE_URL}/admin/reports/bulk`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ ids, status, priority, note }),
+      });
+      return response.ok;
+    } catch (error) {
+      console.error('API bulkUpdateReports Error:', error);
+      return false;
     }
   },
 
@@ -422,6 +445,42 @@ export const api = {
     } catch (error) {
       console.error('API updateSetting Error:', error);
       return false;
+    }
+  },
+
+  getAnalyticsSummary: async (token: string): Promise<any> => {
+    try {
+      const response = await fetch(`${N8N_BASE_URL}/admin/analytics/summary`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('API getAnalyticsSummary Error:', error);
+      return null;
+    }
+  },
+
+  getGeospatialData: async (token: string): Promise<any[]> => {
+    try {
+      const response = await fetch(`${N8N_BASE_URL}/admin/analytics/geo`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('API getGeospatialData Error:', error);
+      return [];
+    }
+  },
+
+  getAIInsights: async (token: string): Promise<{ insight: string }> => {
+    try {
+      const response = await fetch(`${N8N_BASE_URL}/admin/analytics/insights`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      return await response.json();
+    } catch (error) {
+      console.error('API getAIInsights Error:', error);
+      return { insight: "Unable to generate insights at this time." };
     }
   }
 };

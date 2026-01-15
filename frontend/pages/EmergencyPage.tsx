@@ -10,7 +10,10 @@ const EmergencyCard = ({ name, number, description, delay }: { name: string, num
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ delay }}
-        className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 p-8 rounded-[2.5rem] shadow-sm hover:shadow-2xl hover:shadow-rose-500/10 transition-all group"
+        className="bg-white dark:bg-slate-900 border-2 border-slate-100 dark:border-slate-800 p-8 rounded-[2.5rem] relative overflow-hidden
+                   hover:bg-rose-50/50 dark:hover:bg-rose-900/10 
+                   hover:border-rose-400/50 dark:hover:border-rose-500/50
+                   shadow-sm hover:shadow-2xl hover:shadow-rose-500/20 transition-all duration-500 group"
     >
         <div className="flex justify-between items-start mb-6">
             <div className="w-12 h-12 bg-rose-50 dark:bg-rose-900/20 rounded-2xl flex items-center justify-center text-rose-600 dark:text-rose-400 group-hover:scale-110 transition-transform">
@@ -28,6 +31,8 @@ const EmergencyCard = ({ name, number, description, delay }: { name: string, num
         <p className="text-slate-500 dark:text-slate-400 text-sm font-bold leading-relaxed line-clamp-2 italic">
             "{description}"
         </p>
+        {/* Interactive Rose Glow Line */}
+        <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-rose-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity blur-sm"></div>
     </motion.div>
 );
 

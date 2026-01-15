@@ -15,7 +15,7 @@ let DefaultIcon = L.icon({
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
-const LOCATIONS = [
+const LOCATIONS_MOCK = [
     { id: 1, lat: 6.9271, lng: 79.8612, intensity: 0.8, name: "Colombo Fort" },
     { id: 2, lat: 6.935, lng: 79.85, intensity: 0.5, name: "Pettah" },
     { id: 3, lat: 7.2906, lng: 80.6337, intensity: 0.6, name: "Kandy Center" },
@@ -24,7 +24,18 @@ const LOCATIONS = [
     { id: 6, lat: 6.5, lng: 80.1, intensity: 0.3, name: "Kalutara" },
 ];
 
-export default function SafetyMap() {
+interface MapLocation {
+    id: string | number;
+    lat: number;
+    lng: number;
+    intensity: number;
+    name?: string;
+    status?: string;
+}
+
+export default function SafetyMap({ locations }: { locations?: MapLocation[] }) {
+    const displayLocations = locations && locations.length > 0 ? locations : LOCATIONS_MOCK;
+
     return (
         <div className="h-[400px] w-full rounded-xl overflow-hidden border border-[var(--color-border)] shadow-sm z-0 relative">
             <MapContainer
@@ -38,7 +49,7 @@ export default function SafetyMap() {
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
 
-                {LOCATIONS.map(loc => (
+                {displayLocations.filter(l => !isNaN(l.lat) && !isNaN(l.lng)).map(loc => (
                     <CircleMarker
                         key={loc.id}
                         center={[loc.lat, loc.lng]}
@@ -51,8 +62,10 @@ export default function SafetyMap() {
                         radius={20 * loc.intensity + 10}
                     >
                         <Tooltip direction="top" offset={[0, -10]} opacity={1}>
-                            <div className="font-bold text-xs">{loc.name}</div>
-                            <div className="text-[10px]">Active Reports: {Math.floor(loc.intensity * 10)}</div>
+                            <div className="font-bold text-xs">{loc.name || `Report ${String(loc.id).slice(0, 8)}`}</div>
+                            <div className="text-[10px] uppercase font-bold text-slate-500">
+                                {loc.status ? `Status: ${loc.status}` : `Active Reports: ${Math.floor(loc.intensity * 10)}`}
+                            </div>
                         </Tooltip>
                     </CircleMarker>
                 ))}

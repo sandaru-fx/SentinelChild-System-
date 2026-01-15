@@ -94,13 +94,13 @@ export default function ContactPage() {
           <div className="space-y-8">
 
             {/* Emergency Card */}
-            <div className="bg-white dark:bg-slate-900/40 p-8 rounded-3xl border border-red-100 dark:border-red-900/30 shadow-xl shadow-red-500/5 relative overflow-hidden group hover:scale-[1.02] transition-all duration-300">
-              <div className="absolute top-0 right-0 p-4 opacity-10 dark:opacity-5 group-hover:opacity-20 transition-opacity">
-                <i className="fas fa-siren-on text-9xl text-red-600"></i>
+            <div className="bg-white dark:bg-slate-900/40 p-8 rounded-3xl border-2 border-slate-100 dark:border-red-900/30 shadow-xl shadow-red-500/5 relative overflow-hidden group hover:scale-[1.02] hover:border-red-500/50 hover:bg-red-50/30 dark:hover:bg-red-900/10 transition-all duration-500">
+              <div className="absolute top-0 right-0 p-4 opacity-10 dark:opacity-5 group-hover:opacity-20 transition-opacity text-red-600">
+                <i className="fas fa-siren-on text-9xl"></i>
               </div>
               <div className="relative">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center text-red-600 dark:text-red-400">
+                  <div className="w-10 h-10 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center text-red-600 dark:text-red-400 group-hover:scale-110 transition-transform">
                     <i className="fas fa-phone-rotary animate-pulse"></i>
                   </div>
                   <span className="text-red-500 dark:text-red-400 font-black uppercase text-[10px] tracking-widest">Emergency Hotline</span>
@@ -111,16 +111,18 @@ export default function ContactPage() {
                   Call Now
                 </a>
               </div>
+              {/* Interactive Red Glow Line */}
+              <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity blur-sm"></div>
             </div>
 
             {/* NCPA Card */}
-            <div className="bg-white dark:bg-slate-900/40 p-8 rounded-3xl border border-blue-100 dark:border-blue-900/30 shadow-xl shadow-blue-500/5 relative overflow-hidden group hover:scale-[1.02] transition-all duration-300">
-              <div className="absolute top-0 right-0 p-4 opacity-10 dark:opacity-5 group-hover:opacity-20 transition-opacity">
-                <i className="fas fa-shield-check text-9xl text-blue-600"></i>
+            <div className="bg-white dark:bg-slate-900/40 p-8 rounded-3xl border-2 border-slate-100 dark:border-blue-900/30 shadow-xl shadow-blue-500/5 relative overflow-hidden group hover:scale-[1.02] hover:border-blue-500/50 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-all duration-500">
+              <div className="absolute top-0 right-0 p-4 opacity-10 dark:opacity-5 group-hover:opacity-20 transition-opacity text-blue-600">
+                <i className="fas fa-shield-check text-9xl"></i>
               </div>
               <div className="relative">
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400">
+                  <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
                     <i className="fas fa-child-reaching"></i>
                   </div>
                   <span className="text-blue-500 dark:text-blue-400 font-black uppercase text-[10px] tracking-widest">Child Protection</span>
@@ -131,6 +133,8 @@ export default function ContactPage() {
                   Call ChildLine
                 </a>
               </div>
+              {/* Interactive Blue Glow Line */}
+              <div className="absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity blur-sm"></div>
             </div>
 
             {/* Address / Info */}

@@ -77,6 +77,7 @@ func main() {
 	admin.HandleFunc("/update-report", controllers.UpdateReport(client)).Methods(http.MethodPatch)
 	admin.HandleFunc("/reports/{id}", controllers.GetReport(client)).Methods(http.MethodGet)
 	admin.HandleFunc("/reports/{id}", controllers.DeleteReport(client)).Methods(http.MethodDelete)
+	admin.HandleFunc("/reports/bulk", controllers.BulkUpdateReports(client)).Methods(http.MethodPatch)
 
 	// Admin Chat Endpoints
 	admin.HandleFunc("/chat/sessions", controllers.ListChatSessions(client)).Methods(http.MethodGet)
@@ -109,6 +110,11 @@ func main() {
 	// Admin Audit & Workflow
 	admin.HandleFunc("/audit-logs", controllers.GetAuditLogs(client)).Methods(http.MethodGet)
 	admin.HandleFunc("/reports/{id}/internal-notes", controllers.AddInternalNote(client)).Methods(http.MethodPost)
+
+	// Analytics & Geospatial
+	admin.HandleFunc("/analytics/summary", controllers.GetAnalyticsSummary(client)).Methods(http.MethodGet)
+	admin.HandleFunc("/analytics/geo", controllers.GetGeospatialData(client)).Methods(http.MethodGet)
+	admin.HandleFunc("/analytics/insights", controllers.GetAIInsights(client)).Methods(http.MethodGet)
 
 	// Add CORS support
 	c := cors.New(cors.Options{

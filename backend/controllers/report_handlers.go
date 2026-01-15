@@ -5,12 +5,14 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/sandaru-fx/SentinelChild-System/backend/db"
 	"github.com/sandaru-fx/SentinelChild-System/backend/middleware"
@@ -58,13 +60,12 @@ func CreateReport(client *mongo.Client) http.HandlerFunc {
 	}
 }
 
-// ListReports returns a handler which lists reports, optionally filtered by id.
+// ListReports returns a handler which lists reports with pagination and search.
 func ListReports(client *mongo.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := r.URL.Query().Get("id")
-
 		col := collection(client)
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 
 		if id != "" {
@@ -87,18 +88,62 @@ func ListReports(client *mongo.Client) http.HandlerFunc {
 			return
 		}
 
-		cur, err := col.Find(ctx, bson.M{})
+		// Pagination & Search
+		query := r.URL.Query().Get("q")
+		pageStr := r.URL.Query().Get("page")
+		limitStr := r.URL.Query().Get("limit")
+
+		page, _ := strconv.Atoi(pageStr)
+		if page < 1 {
+			page = 1
+		}
+		limit, _ := strconv.Atoi(limitStr)
+		if limit < 1 || limit > 100 {
+			limit = 20
+		}
+
+		filter := bson.M{}
+		if query != "" {
+			filter = bson.M{
+				"$or": []bson.M{
+					{"childName": bson.M{"$regex": query, "$options": "i"}},
+					{"description": bson.M{"$regex": query, "$options": "i"}},
+					{"status": bson.M{"$regex": query, "$options": "i"}},
+				},
+			}
+		}
+
+		// Get total count
+		total, err := col.CountDocuments(ctx, filter)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		opts := options.Find().
+			SetSort(bson.D{{Key: "createdAt", Value: -1}}).
+			SetSkip(int64((page - 1) * limit)).
+			SetLimit(int64(limit))
+
+		cur, err := col.Find(ctx, filter, opts)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 		defer cur.Close(ctx)
-		var out []models.Report = make([]models.Report, 0)
-		if err := cur.All(ctx, &out); err != nil {
+
+		var reports []models.Report = make([]models.Report, 0)
+		if err := cur.All(ctx, &reports); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		json.NewEncoder(w).Encode(out)
+
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"data":  reports,
+			"total": total,
+			"page":  page,
+			"limit": limit,
+		})
 	}
 }
 
