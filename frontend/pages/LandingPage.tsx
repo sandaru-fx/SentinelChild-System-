@@ -68,6 +68,10 @@ export default function LandingPage() {
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400 drop-shadow-sm">
                   Is Safe.
                 </span>
+                <div className="text-4xl sm:text-5xl lg:text-[50px] mt-4 opacity-90 leading-tight">
+                  <span className="text-slate-400 dark:text-slate-500 font-black italic">Your Voice, </span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 font-black">Their Shield.</span>
+                </div>
               </motion.h1>
 
               {/* Subheadline */}
