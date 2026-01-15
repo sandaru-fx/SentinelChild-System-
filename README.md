@@ -2,38 +2,31 @@
 > **A Comprehensive Child Safety and Monitoring Solution**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Java](https://img.shields.io/badge/Language-Java-orange.svg)](https://www.java.com/)
+[![Go](https://img.shields.io/badge/Language-Go-blue.svg)](https://go.dev/)
+[![React](https://img.shields.io/badge/Framework-React-blue.svg)](https://reactjs.org/)
 [![Status](https://img.shields.io/badge/Status-In--Development-green.svg)]()
 
-SentinelChild-System is a robust security and monitoring platform designed to provide parents with real-time insights into their children's digital and physical safety. This project focuses on modern monitoring techniques, ensuring a secure environment for the younger generation.
+SentinelChild-System is a robust security and reporting platform designed to empower citizens and protect children through real-time monitoring and rapid incident reporting.
 
 ---
 
 ## 🚀 Key Features
 
-- **📍 Real-time Tracking:** Monitor location data with high precision.
-- **📱 App Usage Analytics:** Keep track of which applications are being used and for how long.
-- **⚠️ Geo-Fencing:** Receive instant alerts when the child enters or leaves predefined safe zones.
-- **🛡️ Web Filtering:** Block inappropriate content and manage internet access.
-- **📊 Activity Reports:** Detailed daily and weekly summaries of activities.
+- **📍 Anonymous reporting:** Submit detailed reports of incidents without revealing your identity.
+- **🎙️ Voice Guardian:** AI-powered voice assistant for hands-free and rapid reporting.
+- **💬 Real-time Support:** Live chat session with authorized law enforcement officers.
+- **🔍 Status Tracking:** Monitor the progress of your reports in real-time.
+- **🛡️ Data Privacy:** Automated metadata stripping and encrypted evidence storage.
 
 ---
 
 ## 🛠️ Tech Stack
 
-- **Language:** Java / Kotlin (Assuming based on Android/Desktop context)
-- **Database:** Firebase / MySQL
-- **Architecture:** MVVM / Clean Architecture
-- **Tools:** Android Studio, Git
-
----
-
-## 📸 Screenshots
-
-| Dashboard | Real-time Tracking | App Analytics |
-| :---: | :---: | :---: |
-| <img src="https://via.placeholder.com/200" width="200"> | <img src="https://via.placeholder.com/200" width="200"> | <img src="https://via.placeholder.com/200" width="200"> |
-*(Note: Replace these placeholders with your actual app screenshots)*
+- **Frontend:** React, Vite, Tailwind CSS, Framer Motion
+- **Backend:** Go (Golang), Fiber Framework
+- **Database:** MongoDB
+- **AI Integration:** Google Gemini API
+- **Authentication:** Custom JWT / Clerk (Optional)
 
 ---
 
@@ -41,34 +34,32 @@ SentinelChild-System is a robust security and monitoring platform designed to pr
 
 1. **Clone the repo:**
    ```bash
-   git clone [https://github.com/sandaru-fx/SentinelChild-System-.git](https://github.com/sandaru-fx/SentinelChild-System-.git)
+   git clone https://github.com/sandaru-fx/SentinelChild-System-.git
    ```
 
+2. **Install Dependencies:**
+   Run the following command in the root directory to install both root and frontend dependencies:
+   ```bash
+   npm run install:all
+   ```
 
-2. Open in IDE: Open the project folder in Android Studio or IntelliJ IDEA.
+3. **Configure Environment:**
+   Create a `.env` file in the root and `backend` directories with the following variables:
+   - `MONGODB_URI`
+   - `GEMINI_API_KEY`
+   - `PORT` (Default: 8080)
 
-3. Configure API Keys: Add your Google Maps or Firebase configuration files to the app/ directory.
+4. **Run the Application:**
+   Start both the backend and frontend concurrently:
+   ```bash
+   npm run dev
+   ```
 
-4. Build & Run: Click the 'Run' button or use:
+---
 
-```Bash
-
-./gradlew assembleDebug
-
-```
-
-
-📈 Future Enhancements
-[ ] AI-driven behavioral analysis for risk detection.
-
-[ ] Emergency SOS integration with local authorities.
-
-[ ] Cross-platform support (iOS & Web).
-
-
-👤 Author
+## 👤 Author
 Sandaru Chamoda
 
-GitHub: @sandaru-fx
+GitHub: [@sandaru-fx](https://github.com/sandaru-fx)
 
-LinkedIn: www.linkedin.com/in/sandaru-jayaweera-329110373
+LinkedIn: [sandaru-jayaweera-329110373](https://www.linkedin.com/in/sandaru-jayaweera-329110373)
