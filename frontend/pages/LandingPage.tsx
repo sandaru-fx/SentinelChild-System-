@@ -62,13 +62,10 @@ export default function LandingPage() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="text-6xl sm:text-7xl lg:text-[70px] font-black leading-[1.1] tracking-tighter text-slate-900 dark:text-white"
+                className="text-5xl sm:text-7xl lg:text-[85px] font-black leading-tight tracking-tighter text-slate-900 dark:text-white"
               >
-                The Future <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400 drop-shadow-sm">
-                  Is Safe.
-                </span>
-                <div className="text-4xl sm:text-5xl lg:text-[50px] mt-4 opacity-90 leading-tight">
+                The Future <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-indigo-600 to-blue-600 dark:from-blue-400 dark:via-indigo-400 dark:to-purple-400 drop-shadow-sm">Is Safe.</span>
+                <div className="text-3xl sm:text-4xl lg:text-[45px] mt-2 opacity-90 leading-tight">
                   <span className="text-slate-400 dark:text-slate-500 font-black italic">Your Voice, </span>
                   <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 font-black">Their Shield.</span>
                 </div>
