@@ -4,6 +4,12 @@ import { Link, useLocation } from 'react-router-dom';
 import { Admin } from '../types';
 import { useTranslation } from '../context/LanguageContext';
 import ThemeToggle from './ThemeToggle';
+import {
+  ShieldCheck,
+  LayoutDashboard,
+  LogOut,
+  Menu
+} from 'lucide-react';
 
 export const Navbar = ({ user, onLogout }: { user: Admin | null; onLogout: () => void }) => {
   const location = useLocation();
@@ -31,7 +37,7 @@ export const Navbar = ({ user, onLogout }: { user: Admin | null; onLogout: () =>
           <div className="flex items-center gap-4 shrink-0">
             <Link to="/" className="flex items-center gap-3 group">
               <div className="bg-gradient-to-br from-blue-600 to-indigo-700 w-9 h-9 rounded-lg flex items-center justify-center group-hover:rotate-12 transition-all duration-500 shadow-xl shadow-blue-500/20">
-                <i className="fas fa-shield-cat text-white text-base"></i>
+                <ShieldCheck className="text-white w-5 h-5" />
               </div>
               <div className="hidden sm:flex flex-col">
                 <h1 className="text-xl font-black text-slate-900 dark:text-white tracking-tighter leading-none uppercase">CHARS</h1>
@@ -115,21 +121,21 @@ export const Navbar = ({ user, onLogout }: { user: Admin | null; onLogout: () =>
                   title="Admin Dashboard"
                   className="w-8 h-8 rounded-lg flex items-center justify-center transition-all bg-blue-600 text-white shadow-lg shadow-blue-500/20 hover:scale-105 active:scale-95"
                 >
-                  <i className="fas fa-grid-2 text-[10px]"></i>
+                  <LayoutDashboard className="w-4 h-4" />
                 </Link>
                 <div className="w-[1px] h-4 bg-slate-200 dark:bg-slate-700 mx-0.5"></div>
                 <button
                   onClick={onLogout}
                   className="h-8 px-3 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-all flex items-center gap-2 group active:scale-95 shadow-md shadow-red-500/10"
                 >
-                  <i className="fas fa-power-off text-[9px] group-hover:rotate-90 transition-transform"></i>
+                  <LogOut className="w-4 h-4 group-hover:rotate-12 transition-transform" />
                   <span className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap">Logout</span>
                 </button>
               </div>
             )}
 
             <button className="lg:hidden w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-              <i className="fas fa-bars-staggered"></i>
+              <Menu className="w-5 h-5" />
             </button>
           </div>
         </div>

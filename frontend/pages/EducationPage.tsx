@@ -3,6 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from '../context/LanguageContext';
 import { api } from '../services/api';
 import { Resource, ResourceType } from '../types';
+import {
+    Clock,
+    ArrowRight,
+    ChevronDown
+} from 'lucide-react';
 
 const EducationCard = ({ resource, delay }: { resource: Resource, delay: number }) => {
     // Determine the image path based on the icon field or a default
@@ -48,11 +53,11 @@ const EducationCard = ({ resource, delay }: { resource: Resource, delay: number 
 
                 <div className="mt-auto pt-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                     <div className="flex items-center gap-2 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
-                        <i className="far fa-clock"></i>
+                        <Clock className="w-3.5 h-3.5" />
                         <span>{resource.readTime || '5 Min Read'}</span>
                     </div>
                     <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover:bg-blue-600 group-hover:text-white transition-all">
-                        <i className="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </div>
                 </div>
             </div>
@@ -83,7 +88,7 @@ const FAQItem = ({ faq, index }: { faq: Resource, index: number }) => {
                     </h4>
                 </div>
                 <div className={`w-8 h-8 rounded-full border border-slate-200 dark:border-slate-800 flex items-center justify-center transition-all duration-500 ${isOpen ? 'rotate-180 bg-blue-600 border-blue-600 text-white' : ''}`}>
-                    <i className="fas fa-chevron-down text-xs"></i>
+                    <ChevronDown className="w-4 h-4" />
                 </div>
             </button>
             <AnimatePresence>

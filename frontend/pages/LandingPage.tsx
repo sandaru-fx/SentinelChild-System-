@@ -2,6 +2,15 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from '../context/LanguageContext';
 import { motion } from 'framer-motion';
+import {
+  ShieldCheck,
+  ShieldOff,
+  Cpu,
+  Fingerprint,
+  ArrowRight,
+  Mic,
+  ChevronDown
+} from 'lucide-react';
 import bannerImage from '../assets/banner_child.png';
 
 const GlassCard = ({ icon, title, desc, delay }: { icon: string, title: string, desc: string, delay: number }) => (
@@ -17,7 +26,9 @@ const GlassCard = ({ icon, title, desc, delay }: { icon: string, title: string, 
                ring-1 ring-white/20 hover:-translate-y-2"
   >
     <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500/10 to-indigo-500/10 dark:from-blue-500/20 dark:to-indigo-500/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-inner">
-      <i className={`fas ${icon} text-blue-600 dark:text-blue-400 text-2xl group-hover:text-blue-700 dark:group-hover:text-amber-500 transition-colors`}></i>
+      <div className="text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-amber-500 transition-colors">
+        {icon}
+      </div>
     </div>
     <h3 className="text-slate-900 dark:text-white font-black text-xl mb-3 tracking-tight group-hover:text-blue-800 dark:group-hover:text-amber-400 transition-colors">{title}</h3>
     <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed font-medium group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">{desc}</p>
@@ -100,13 +111,13 @@ export default function LandingPage() {
               >
                 <Link to="/report" className="relative group overflow-hidden bg-slate-950 dark:bg-white text-white dark:text-slate-900 px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-xs shadow-2xl shadow-slate-900/20 hover:shadow-blue-500/20 hover:-translate-y-1 transition-all duration-500">
                   <span className="relative z-10 flex items-center gap-3">
-                    Submit Official Report <i className="fas fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    Submit Official Report <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </span>
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </Link>
 
                 <button onClick={() => window.dispatchEvent(new CustomEvent('toggle-voice-assistant'))} className="px-10 py-5 rounded-2xl font-black uppercase tracking-widest text-xs border border-slate-200 dark:border-white/10 bg-white/40 dark:bg-white/5 hover:bg-white/80 dark:hover:bg-white/10 backdrop-blur-md transition-all flex items-center gap-3 text-slate-900 dark:text-white hover:-translate-y-1 ring-1 ring-white/40">
-                  <i className="fas fa-microphone text-blue-600 dark:text-blue-400 animate-pulse"></i> Voice Reporting
+                  <Mic className="text-blue-600 dark:text-blue-400 animate-pulse w-4 h-4" /> Voice Reporting
                 </button>
               </motion.div>
 
@@ -119,7 +130,7 @@ export default function LandingPage() {
               >
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-900 flex items-center justify-center shadow-lg border border-slate-100 dark:border-slate-800">
-                    <i className="fas fa-shield-check text-blue-600"></i>
+                    <ShieldCheck className="text-blue-600 w-5 h-5" />
                   </div>
                   <span className="text-[10px] font-black uppercase text-slate-600 dark:text-slate-400 leading-tight tracking-widest">End-to-End<br />Encrypted</span>
                 </div>
@@ -161,7 +172,7 @@ export default function LandingPage() {
         {/* Scroll Indicator */}
         <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce opacity-30 pointer-events-none">
           <span className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 dark:text-slate-400">Explore Portal</span>
-          <i className="fas fa-chevron-down text-slate-400"></i>
+          <ChevronDown className="text-slate-400 w-4 h-4" />
         </div>
       </section>
 
@@ -180,19 +191,19 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <GlassCard
               delay={0.2}
-              icon="fa-shield-slash"
+              icon={<ShieldOff className="w-8 h-8" />}
               title="Identity Shielding"
               desc="Our servers automatically strip metadata from evidence. Your location and device identity are never exposed to unauthorized personnel."
             />
             <GlassCard
               delay={0.4}
-              icon="fa-microchip"
+              icon={<Cpu className="w-8 h-8" />}
               title="Smart AI Routing"
               desc="Reports are analyzed and routed to the nearest available Child Protection unit in real-time, ensuring intervention happens within hours, not days."
             />
             <GlassCard
               delay={0.6}
-              icon="fa-fingerprint"
+              icon={<Fingerprint className="w-8 h-8" />}
               title="Forensic Integrity"
               desc="Uploaded evidence is cryptographically signed upon entry. This ensures the chain of custody is indisputable in a court of law."
             />
