@@ -1,6 +1,7 @@
 # 🛡️ SentinelChild-System
 > **A Comprehensive Child Safety and Monitoring Solution**
 
+[![Development CI](https://github.com/sandaru-fx/SentinelChild-System-/actions/workflows/ci.yml/badge.svg)](https://github.com/sandaru-fx/SentinelChild-System-/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Go](https://img.shields.io/badge/Language-Go-blue.svg)](https://go.dev/)
 [![React](https://img.shields.io/badge/Framework-React-blue.svg)](https://reactjs.org/)
