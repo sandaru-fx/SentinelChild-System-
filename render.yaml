@@ -1,0 +1,32 @@
+services:
+  # Backend Web Service
+  - type: web
+    name: sentinel-child-backend
+    env: docker
+    dockerfilePath: ./Dockerfile.backend
+    region: ohio
+    plan: free
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: DB_NAME
+        value: sentinel_child
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: PORT
+        value: 8080
+
+  # Frontend Static Site
+  - type: static
+    name: sentinel-child-frontend
+    env: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishDir: frontend/dist
+    region: ohio
+    plan: free
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          name: sentinel-child-backend
+          type: web
+          property: host
