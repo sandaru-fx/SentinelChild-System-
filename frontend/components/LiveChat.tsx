@@ -16,13 +16,14 @@ interface ValidationErrors {
 
 export default function LiveChat({ externalOpen, setExternalOpen }: LiveChatProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [step, setStep] = useState<'GREETING' | 'CHAT'>('GREETING');
-  const [nickName, setNickName] = useState('');
+  const [isPrivate, setIsPrivate] = useState(() => localStorage.getItem('chars_chat_private') === 'true');
+
   const [sessionId, setSessionId] = useState<string>(() => {
-    const saved = localStorage.getItem('chars_chat_session');
+    const storage = isPrivate ? sessionStorage : localStorage;
+    const saved = storage.getItem('chars_chat_session');
     if (saved) return saved;
     const newId = `SESS-${Math.random().toString(36).substr(2, 9)}`;
-    localStorage.setItem('chars_chat_session', newId);
+    storage.setItem('chars_chat_session', newId);
     return newId;
   });
 
@@ -35,8 +36,9 @@ export default function LiveChat({ externalOpen, setExternalOpen }: LiveChatProp
   useEffect(() => {
     // Check if we already have a session in DB with a name
     const checkExisting = async () => {
+      const storage = isPrivate ? sessionStorage : localStorage;
       if (sessionId) {
-        const savedName = localStorage.getItem('chars_chat_name');
+        const savedName = storage.getItem('chars_chat_name');
         if (savedName) {
           setNickName(savedName);
           setStep('CHAT');
@@ -44,7 +46,7 @@ export default function LiveChat({ externalOpen, setExternalOpen }: LiveChatProp
       }
     };
     checkExisting();
-  }, [sessionId]);
+  }, [sessionId, isPrivate]);
 
   useEffect(() => {
     if (externalOpen !== undefined) setIsOpen(externalOpen);
@@ -108,7 +110,9 @@ export default function LiveChat({ externalOpen, setExternalOpen }: LiveChatProp
   const startChat = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nickName.trim()) return;
-    localStorage.setItem('chars_chat_name', nickName);
+    const storage = isPrivate ? sessionStorage : localStorage;
+    storage.setItem('chars_chat_name', nickName);
+    localStorage.setItem('chars_chat_private', isPrivate.toString());
     setStep('CHAT');
     // WS will auto-connect due to step change
   };
@@ -145,10 +149,13 @@ export default function LiveChat({ externalOpen, setExternalOpen }: LiveChatProp
     setInput('');
   };
 
-  const resetChat = () => {
-    if (window.confirm("Delete this session and start a new anonymous chat?")) {
+  const secureExit = () => {
+    if (window.confirm("End session and WIP ALL traces from this browser? This action is permanent for privacy.")) {
       localStorage.removeItem('chars_chat_session');
       localStorage.removeItem('chars_chat_name');
+      localStorage.removeItem('chars_chat_private');
+      sessionStorage.removeItem('chars_chat_session');
+      sessionStorage.removeItem('chars_chat_name');
       window.location.reload();
     }
   };
@@ -166,21 +173,31 @@ export default function LiveChat({ externalOpen, setExternalOpen }: LiveChatProp
     <div className="fixed bottom-8 right-8 z-[200] w-96 bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden flex flex-col max-h-[600px] animate-slide-up">
       <div className="p-6 bg-slate-900 text-white flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center animate-pulse">
-            <i className="fas fa-headset text-sm"></i>
+          <div className="relative">
+            <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center">
+              <i className="fas fa-headset text-sm"></i>
+            </div>
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-slate-900 rounded-full animate-pulse"></div>
           </div>
           <div>
             <h3 className="font-black text-sm tracking-tight">Live Support</h3>
-            <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-widest">Authorized Police Line</p>
+            <p className="text-[10px] text-indigo-400 font-bold uppercase tracking-widest">
+              {isPrivate ? '🛡️ Private Session' : 'Authorized Police Line'}
+            </p>
           </div>
         </div>
-        <div className="flex gap-4 items-center">
+        <div className="flex gap-3 items-center">
           {step === 'CHAT' && (
-            <button onClick={resetChat} title="New Chat" className="text-white/40 hover:text-white transition-colors">
-              <i className="fas fa-plus-circle text-lg"></i>
+            <button
+              onClick={secureExit}
+              title="Secure Exit (Clear all traces)"
+              className="px-3 py-1.5 bg-red-600/20 hover:bg-red-600 text-red-500 hover:text-white rounded-lg transition-all text-[10px] font-black uppercase tracking-tighter flex items-center gap-2"
+            >
+              <i className="fas fa-shield-alt"></i>
+              EXIT
             </button>
           )}
-          <button onClick={closeWindow} className="text-white/40 hover:text-white transition-colors">
+          <button onClick={closeWindow} className="w-8 h-8 flex items-center justify-center bg-white/5 hover:bg-white/10 rounded-lg text-white/40 hover:text-white transition-colors">
             <i className="fas fa-times"></i>
           </button>
         </div>
@@ -198,21 +215,46 @@ export default function LiveChat({ externalOpen, setExternalOpen }: LiveChatProp
             <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl">
               <i className="fas fa-child"></i>
             </div>
-            <div className="space-y-2">
-              <h4 className="text-lg font-black text-slate-900">Protecting Our Future</h4>
-              <p className="text-xs text-slate-500 font-medium px-4">
-                Pin sidda wenawa machan meyata sambanda unata. Api okkoma ekathu wela innocent childrenwa save karagamu.
+            <div className="space-y-2 px-4">
+              <h4 className="text-lg font-black text-slate-900 leading-tight">Protecting Our Future</h4>
+              <p className="text-[11px] text-slate-500 font-bold">
+                Oyata ona prashnayak katha karanna machan. Oya sampurnayenma safe.
               </p>
             </div>
-            <form onSubmit={startChat} className="w-full space-y-3 px-4">
-              <input
-                autoFocus
-                required
-                value={nickName}
-                onChange={e => setNickName(e.target.value)}
-                placeholder="Oyata kiyanna ona nama mokakda?"
-                className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-600 outline-none font-bold"
-              />
+
+            <form onSubmit={startChat} className="w-full space-y-4 px-4">
+              <div className="space-y-1">
+                <input
+                  autoFocus
+                  required
+                  value={nickName}
+                  onChange={e => setNickName(e.target.value)}
+                  placeholder="Nama mokakda chamch?"
+                  className="w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-indigo-600 outline-none font-bold shadow-sm"
+                />
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <label className={`flex items-center justify-between p-3 rounded-2xl border transition-all cursor-pointer ${isPrivate ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg' : 'bg-white border-slate-200 text-slate-600'}`}>
+                  <div className="flex items-center gap-3">
+                    <i className={`fas ${isPrivate ? 'fa-lock' : 'fa-unlock-alt'} text-sm`}></i>
+                    <div className="text-left">
+                      <p className="text-[10px] font-black uppercase tracking-widest leading-none">Private Mode</p>
+                      <p className={`text-[8px] mt-0.5 ${isPrivate ? 'text-indigo-200' : 'text-slate-400'}`}>No history will be saved</p>
+                    </div>
+                  </div>
+                  <input
+                    type="checkbox"
+                    className="hidden"
+                    checked={isPrivate}
+                    onChange={(e) => setIsPrivate(e.target.checked)}
+                  />
+                  <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${isPrivate ? 'border-white' : 'border-slate-300'}`}>
+                    {isPrivate && <div className="w-2 h-2 bg-white rounded-full"></div>}
+                  </div>
+                </label>
+              </div>
+
               <button type="submit" className="w-full py-3 bg-indigo-600 text-white rounded-xl font-black text-sm shadow-lg hover:bg-indigo-700 transition-all">
                 Chat eka Start karamu
               </button>

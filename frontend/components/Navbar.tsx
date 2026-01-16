@@ -30,8 +30,8 @@ export const Navbar = ({ user, onLogout }: { user: Admin | null; onLogout: () =>
       {/* Premium Glassmorphism Background */}
       <div className="absolute inset-0 bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl border-b border-white/20 dark:border-white/5 shadow-[0_4px_30px_rgba(0,0,0,0.03)] dark:shadow-none"></div>
 
-      <div className="relative z-10 max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-10">
-        <div className="flex h-16 items-center justify-between gap-4">
+      <div className="relative z-10 max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between gap-2">
 
           {/* Left Side: Brand & Status */}
           <div className="flex items-center gap-4 shrink-0">
@@ -54,12 +54,24 @@ export const Navbar = ({ user, onLogout }: { user: Admin | null; onLogout: () =>
 
           {/* Center: Navigation Groups */}
           <div className="hidden lg:flex flex-grow justify-center items-center gap-1">
-            <div className="flex items-center gap-1 bg-slate-900/5 dark:bg-white/5 p-1 rounded-xl mr-4">
+            {/* Home Link - Absolute Start */}
+            <Link
+              to={navLinks[0].path}
+              className={`mr-6 text-[11px] font-black uppercase tracking-[0.12em] transition-all relative group py-2 
+                ${location.pathname === navLinks[0].path
+                  ? 'text-slate-900 dark:text-white'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+            >
+              {navLinks[0].name}
+            </Link>
+
+            <div className="flex items-center gap-1 bg-slate-900/5 dark:bg-white/5 p-1 rounded-xl mr-8">
               {navLinks.slice(1, 3).map(link => (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`px-4 py-2 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all
+                  className={`px-5 py-2 text-[11px] font-black uppercase tracking-widest rounded-lg transition-all
                     ${location.pathname === link.path
                       ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
                       : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-800'
@@ -70,15 +82,15 @@ export const Navbar = ({ user, onLogout }: { user: Admin | null; onLogout: () =>
               ))}
             </div>
 
-            <div className="flex items-center gap-8 px-4">
-              {navLinks.slice(3, 6).concat(navLinks.slice(0, 1)).map(link => (
+            <div className="flex items-center gap-12 px-2">
+              {[navLinks[4], navLinks[3], navLinks[5]].map(link => (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`text-[11px] font-bold tracking-wide transition-all relative group py-2 
+                  className={`text-[11px] font-black uppercase tracking-[0.12em] transition-all relative group py-2 
                     ${location.pathname === link.path
                       ? 'text-slate-900 dark:text-white'
-                      : 'text-slate-400 dark:text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                     }`}
                 >
                   {link.name}
@@ -88,16 +100,16 @@ export const Navbar = ({ user, onLogout }: { user: Admin | null; onLogout: () =>
           </div>
 
           {/* Right Section: Tools & Actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 shrink-0">
             <Link
               to="/emergency"
-              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-lg shadow-red-500/20 flex items-center gap-2 group mr-2 h-9"
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-lg shadow-red-500/20 flex items-center gap-2 group mr-1 h-9"
             >
               <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping"></span>
               {t('emergency')}
             </Link>
 
-            <div className="hidden sm:flex items-center gap-1 mr-2 px-2 py-1 bg-slate-100 dark:bg-slate-800/50 rounded-lg h-9">
+            <div className="hidden sm:flex items-center gap-1 mr-1 px-2 py-1 bg-slate-100 dark:bg-slate-800/50 rounded-lg h-9">
               {['en', 'si', 'ta'].map((lang) => (
                 <button
                   key={lang}
@@ -115,7 +127,7 @@ export const Navbar = ({ user, onLogout }: { user: Admin | null; onLogout: () =>
             <ThemeToggle />
 
             {user && (
-              <div className="flex items-center gap-1.5 p-1 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm ml-2">
+              <div className="flex items-center gap-1.5 p-1 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm ml-1 shrink-0">
                 <Link
                   to="/admin/dashboard"
                   title="Admin Dashboard"
@@ -126,9 +138,9 @@ export const Navbar = ({ user, onLogout }: { user: Admin | null; onLogout: () =>
                 <div className="w-[1px] h-4 bg-slate-200 dark:bg-slate-700 mx-0.5"></div>
                 <button
                   onClick={onLogout}
-                  className="h-8 px-3 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-all flex items-center gap-2 group active:scale-95 shadow-md shadow-red-500/10"
+                  className="h-8 px-3 rounded-lg border border-red-600/20 text-red-600 hover:bg-red-600 hover:text-white transition-all flex items-center gap-2 group active:scale-95 shadow-sm"
                 >
-                  <LogOut className="w-4 h-4 group-hover:rotate-12 transition-transform" />
+                  <LogOut className="w-3.5 h-3.5 group-hover:rotate-12 transition-transform" />
                   <span className="text-[10px] font-black uppercase tracking-widest whitespace-nowrap">Logout</span>
                 </button>
               </div>
