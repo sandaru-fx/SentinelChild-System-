@@ -121,7 +121,8 @@ export interface Inquiry {
 export enum ResourceType {
   ARTICLE = 'ARTICLE',
   VIDEO = 'VIDEO',
-  GUIDE = 'GUIDE'
+  GUIDE = 'GUIDE',
+  FAQ = 'FAQ'
 }
 
 export interface Resource {

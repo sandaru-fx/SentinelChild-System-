@@ -12,7 +12,8 @@ import {
     ChevronRight,
     Save,
     X,
-    Languages
+    Languages,
+    HelpCircle
 } from 'lucide-react';
 import { api } from '../services/api';
 import { Resource, ResourceType } from '../types';
@@ -106,6 +107,7 @@ const AdminResourcesPage: React.FC = () => {
         switch (type) {
             case 'VIDEO': return <Video className="w-5 h-5" />;
             case 'GUIDE': return <BookOpen className="w-5 h-5" />;
+            case 'FAQ': return <HelpCircle className="w-5 h-5" />;
             default: return <FileText className="w-5 h-5" />;
         }
     };
@@ -145,6 +147,7 @@ const AdminResourcesPage: React.FC = () => {
                 >
                     <option value="ALL">All Types</option>
                     <option value="ARTICLE">Articles</option>
+                    <option value="FAQ">FAQs</option>
                     <option value="VIDEO">Videos</option>
                     <option value="GUIDE">Guides</option>
                 </select>
@@ -197,7 +200,8 @@ const AdminResourcesPage: React.FC = () => {
                                 </td>
                                 <td className="px-6 py-4">
                                     <span className={`px-2 py-1 text-[10px] font-bold rounded-full ${resource.type === 'VIDEO' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
-                                            resource.type === 'GUIDE' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                                        resource.type === 'GUIDE' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                                            resource.type === 'FAQ' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' :
                                                 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400'
                                         }`}>
                                         {resource.type}
@@ -270,6 +274,7 @@ const AdminResourcesPage: React.FC = () => {
                                         className="w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-indigo-500"
                                     >
                                         <option value="ARTICLE">Article</option>
+                                        <option value="FAQ">FAQ</option>
                                         <option value="VIDEO">Video</option>
                                         <option value="GUIDE">Guide</option>
                                     </select>
@@ -312,14 +317,26 @@ const AdminResourcesPage: React.FC = () => {
                                 />
                             </div>
 
-                            <div className="space-y-1">
-                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">URL / Link (Optional)</label>
-                                <input
-                                    type="text"
-                                    value={currentResource?.link || ''}
-                                    onChange={(e) => setCurrentResource({ ...currentResource!, link: e.target.value })}
-                                    className="w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-indigo-500"
-                                />
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">URL / Link (Optional)</label>
+                                    <input
+                                        type="text"
+                                        value={currentResource?.link || ''}
+                                        onChange={(e) => setCurrentResource({ ...currentResource!, link: e.target.value })}
+                                        className="w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-indigo-500"
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Icon / Image Path</label>
+                                    <input
+                                        type="text"
+                                        value={currentResource?.icon}
+                                        placeholder="e.g. /frontend/assets/resources/child_safety.png"
+                                        onChange={(e) => setCurrentResource({ ...currentResource!, icon: e.target.value })}
+                                        className="w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-indigo-500"
+                                    />
+                                </div>
                             </div>
 
                             <div className="space-y-1">
@@ -330,6 +347,18 @@ const AdminResourcesPage: React.FC = () => {
                                     placeholder="e.g. 5 min read, 10 min video"
                                     onChange={(e) => setCurrentResource({ ...currentResource!, readTime: e.target.value })}
                                     className="w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-indigo-500"
+                                />
+                            </div>
+
+                            <div className="space-y-1">
+                                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Full Content (Markdown)</label>
+                                <textarea
+                                    required
+                                    rows={8}
+                                    value={currentResource?.content}
+                                    onChange={(e) => setCurrentResource({ ...currentResource!, content: e.target.value })}
+                                    placeholder="Enter the full article content or FAQ answer here..."
+                                    className="w-full px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none focus:ring-2 focus:ring-indigo-500 resize-none font-mono text-sm"
                                 />
                             </div>
 

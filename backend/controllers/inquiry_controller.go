@@ -12,6 +12,7 @@ import (
 
 	"github.com/sandaru-fx/SentinelChild-System/backend/db"
 	"github.com/sandaru-fx/SentinelChild-System/backend/models"
+	"github.com/sandaru-fx/SentinelChild-System/backend/utils"
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
@@ -75,6 +76,16 @@ func CreateInquiry(client *mongo.Client) http.HandlerFunc {
 					fmt.Printf("❌ File Write Error: %v\n", err) // DEBUG LOG
 					http.Error(w, "Unable to write file", http.StatusInternalServerError)
 					return
+				}
+
+				// Automatic Transcription with Gemini 2.0
+				if transcription == "" || transcription == "(Audio Only Report)" {
+					file.Seek(0, 0) // Reset file pointer
+					audioData, _ := io.ReadAll(file)
+					tx, err := utils.TranscribeAudio(audioData, handler.Header.Get("Content-Type"))
+					if err == nil {
+						transcription = tx
+					}
 				}
 
 				audioURL = "/uploads/voice_notes/" + filename

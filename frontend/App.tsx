@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import AdminLayout from './layouts/AdminLayout';
-import { HashRouter, Routes, Route, Link } from 'react-router-dom';
+import { HashRouter, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { Admin } from './types';
 import LandingPage from './pages/LandingPage';
 import ReportPage from './pages/ReportPage';
@@ -60,7 +60,12 @@ const Footer = () => (
         <ul className="space-y-4 text-sm font-bold">
           <li className="hover:text-white transition-colors"><Link to="/about">Our Mission</Link></li>
           <li className="hover:text-white transition-colors"><Link to="/contact">Technical Support</Link></li>
-          <li className="hover:text-white transition-colors cursor-pointer">Security Terms</li>
+          <li className="hover:text-white transition-colors cursor-pointer text-[10px] opacity-70 border-t border-slate-900 pt-4 mt-4">
+            <Link to="/portal/staff-gate" className="flex items-center gap-2">
+              <i className="fas fa-fingerprint opacity-50"></i>
+              Personnel Access
+            </Link>
+          </li>
         </ul>
       </div>
     </div>
@@ -105,7 +110,16 @@ export default function App() {
               <Route path="/emergency" element={<><Navbar user={user} onLogout={handleLogout} /><main className="flex-grow"><EmergencyPage /></main><Footer /><VoiceAssistant /><LiveChat externalOpen={chatOpen} setExternalOpen={setChatOpen} /><SafetyCluster onOpenHelp={() => setChatOpen(true)} /></>} />
               <Route path="/privacy" element={<><Navbar user={user} onLogout={handleLogout} /><main className="flex-grow"><PrivacyPage /></main><Footer /><VoiceAssistant /><LiveChat externalOpen={chatOpen} setExternalOpen={setChatOpen} /><SafetyCluster onOpenHelp={() => setChatOpen(true)} /></>} />
               <Route path="/resources" element={<><Navbar user={user} onLogout={handleLogout} /><main className="flex-grow"><EducationPage /></main><Footer /><VoiceAssistant /><LiveChat externalOpen={chatOpen} setExternalOpen={setChatOpen} /><SafetyCluster onOpenHelp={() => setChatOpen(true)} /></>} />
-              <Route path="/admin-login" element={<><Navbar user={user} onLogout={handleLogout} /><main className="flex-grow"><AdminLoginPage onLogin={handleLogin} /></main><Footer /></>} />
+              <Route
+                path="/portal/staff-gate"
+                element={
+                  user ? (
+                    <Navigate to="/admin/dashboard" replace />
+                  ) : (
+                    <><Navbar user={user} onLogout={handleLogout} /><main className="flex-grow"><AdminLoginPage onLogin={handleLogin} /></main><Footer /></>
+                  )
+                }
+              />
 
               {/* Admin Routes with Sidebar Layout */}
               <Route path="/admin" element={<AdminLayout user={user} onLogout={handleLogout} />}>

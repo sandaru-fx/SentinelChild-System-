@@ -2,12 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 import { api } from '../services/api';
 import { Admin, Inquiry } from '../types';
+import { InquiryReport } from '../components/admin/InquiryReport';
+import { SlideOver } from '../components/admin/SlideOver';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 export default function AdminInquiriesPage({ user }: { user: Admin | null }) {
     const { theme } = useTheme();
     const [inquiries, setInquiries] = useState<Inquiry[]>([]);
     const [loading, setLoading] = useState(true);
     const [playingAudio, setPlayingAudio] = useState<string | null>(null);
+    const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
+    const [isDownloading, setIsDownloading] = useState(false);
 
     useEffect(() => {
         if (user?.token) {
@@ -46,6 +52,52 @@ export default function AdminInquiriesPage({ user }: { user: Admin | null }) {
         const fullUrl = `${API_URL}${url}`;
         const audio = new Audio(fullUrl);
         audio.play().catch(e => console.error("Audio Play Error:", e));
+    };
+
+    const handleDownloadPDF = async () => {
+        if (!selectedInquiry) return;
+
+        console.log("📄 Starting PDF Generation for:", selectedInquiry.id);
+        setIsDownloading(true);
+
+        try {
+            // Small delay to ensure DOM is ready and styled
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            const reportElement = document.getElementById(`report-${selectedInquiry.id}`);
+            if (!reportElement) {
+                console.error("❌ Report element not found ID:", `report-${selectedInquiry.id}`);
+                throw new Error("Report element not found");
+            }
+
+            const canvas = await html2canvas(reportElement, {
+                scale: 1.5, // Reduced from 2 for better memory handling
+                useCORS: true,
+                logging: true, // Enable logging for debugging
+                backgroundColor: '#ffffff',
+                allowTaint: true,
+                onclone: (doc) => {
+                    // Ensure the cloned document has the report visible
+                    const el = doc.getElementById(`report-${selectedInquiry.id}`);
+                    if (el) el.style.display = 'block';
+                }
+            });
+
+            console.log("✅ Canvas generated successfully");
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            pdf.save(`Intelligence_Report_${selectedInquiry.id.slice(-8).toUpperCase()}.pdf`);
+            console.log("📂 PDF Saved!");
+        } catch (error) {
+            console.error('PDF Generation Error Detail:', error);
+            alert('Failed to generate PDF. Machan, try again in a second or check if the report is fully loaded.');
+        } finally {
+            setIsDownloading(false);
+        }
     };
 
     return (
@@ -92,6 +144,12 @@ export default function AdminInquiriesPage({ user }: { user: Admin | null }) {
                                         </button>
                                     )}
                                     <button
+                                        onClick={() => setSelectedInquiry(inquiry)}
+                                        className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'}`}
+                                    >
+                                        <i className="fas fa-file-invoice text-blue-500"></i> View Intelligence
+                                    </button>
+                                    <button
                                         onClick={() => handleDelete(inquiry.id)}
                                         className="text-red-500 hover:bg-red-50 p-2 rounded-lg transition-colors"
                                         title="Delete Inquiry"
@@ -124,6 +182,40 @@ export default function AdminInquiriesPage({ user }: { user: Admin | null }) {
                     )}
                 </div>
             )}
+
+            {/* Intelligence Report Modal */}
+            <SlideOver
+                isOpen={!!selectedInquiry}
+                onClose={() => setSelectedInquiry(null)}
+                title="Intelligence Case Report"
+            >
+                {selectedInquiry && (
+                    <div className="space-y-6">
+                        <div className="flex justify-end gap-3 mb-4">
+                            <button
+                                onClick={handleDownloadPDF}
+                                disabled={isDownloading}
+                                className="bg-slate-900 dark:bg-slate-800 text-white px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-800 transition-all shadow-lg flex items-center gap-2 disabled:opacity-50"
+                            >
+                                {isDownloading ? (
+                                    <><i className="fas fa-spinner fa-spin"></i> Processing...</>
+                                ) : (
+                                    <><i className="fas fa-download"></i> Download PDF</>
+                                )}
+                            </button>
+                            <button
+                                onClick={() => window.print()}
+                                className="bg-blue-600 text-white px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-blue-700 transition-all shadow-lg flex items-center gap-2"
+                            >
+                                <i className="fas fa-print"></i> Print Official Report
+                            </button>
+                        </div>
+                        <div className="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+                            <InquiryReport inquiry={selectedInquiry} />
+                        </div>
+                    </div>
+                )}
+            </SlideOver>
         </div>
     );
 }

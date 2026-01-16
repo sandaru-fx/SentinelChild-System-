@@ -13,7 +13,9 @@ export default function AdminLayout({ user, onLogout }: { user: Admin | null; on
 
     React.useEffect(() => {
         if (!user) {
-            navigate('/admin-login');
+            // Stealth Redirect: Instead of showing login, send to home
+            // This masks the existence of the admin portal to random visitors
+            navigate('/');
         }
     }, [user, navigate]);
 

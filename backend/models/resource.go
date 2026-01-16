@@ -12,6 +12,7 @@ const (
 	ResourceTypeArticle ResourceType = "ARTICLE"
 	ResourceTypeVideo   ResourceType = "VIDEO"
 	ResourceTypeGuide   ResourceType = "GUIDE"
+	ResourceTypeFAQ     ResourceType = "FAQ"
 )
 
 type Resource struct {
